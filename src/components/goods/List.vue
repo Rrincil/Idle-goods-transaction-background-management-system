@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- {{total}} -->
-    {{goodsList}}
+    <!-- {{goodsList}} -->
     <!-- 面包屑导航区域 -->
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
@@ -80,8 +80,9 @@ export default {
     async getGoodsList() {
       // 解析token获取id
       const decoded = jwtdecode(window.sessionStorage.token)
-      console.log(decoded.id)
-      const { data: res } = await this.$http.get('api/allproduct/getallmes', { userid: decoded.id })
+      const userid = decoded.id
+      // console.log(decoded.id)
+      const { data: res } = await this.$http.post('api/allproduct/getallmes', { userid: userid })
       // const { data: res } = await this.$http.get('api/allproduct/getallmes', {
       //   params: this.queryInfo
       // })

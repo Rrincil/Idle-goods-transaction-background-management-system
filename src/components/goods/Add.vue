@@ -34,19 +34,19 @@
           v-model="activeIndex"
           :tab-position="tabPosition"
           :before-leave="beforeTabLeave"
-          @tab-click="tabClicked"
+          tab-click="tabClicked"
         >
           <el-tab-pane label="基本信息" name="0">
-            <el-form-item prop="goods_weight" label="商家名称">
+            <el-form-item prop="shopname" label="商家名称">
               <el-input v-model="addForm.shopname" placeholder="帽子之家"></el-input>
             </el-form-item>
-            <el-form-item prop="goods_name" label="商品名称">
+            <el-form-item prop="name" label="商品名称">
               <el-input v-model="addForm.name"></el-input>
             </el-form-item>
-            <el-form-item prop="goods_price" label="商品价格">
+            <el-form-item prop="price" label="商品价格">
               <el-input v-model="addForm.price" type="number"></el-input>
             </el-form-item>
-            <el-form-item prop="goods_number" label="商品数量">
+            <el-form-item prop="number" label="商品数量">
               <el-input v-model="addForm.number" type="number"></el-input>
             </el-form-item>
             <el-form-item prop="goods_cat" label="商品分类">
@@ -63,16 +63,13 @@
             </el-form-item>
           </el-tab-pane>
           <el-tab-pane label="商品参数" name="1">
-            <!-- 渲染表单item项 -->
             <el-form-item :label="item.attr_name" v-for="item in manyTabelData" :key="item.attr_id">
-              <!-- 复选框组 -->
               <el-checkbox-group v-model="item.attr_vals">
                 <el-checkbox :label="cb" v-for="(cb,i) in item.attr_vals" :key="i" border></el-checkbox>
               </el-checkbox-group>
             </el-form-item>
           </el-tab-pane>
           <el-tab-pane label="商品属性" name="2">
-            <!-- 渲染表单item项 -->
             <el-form-item :label="item.attr_name" v-for="item in onlyTabelData" :key="item.attr_id">
               <el-input v-model="item.attr_vals"></el-input>
             </el-form-item>
@@ -80,19 +77,22 @@
           <el-tab-pane label="商品图片" name="3">
             <!-- action表示图片上传后台api地址 -->
             <el-upload
-              :action="uploadURL"
+              class="upload-demo"
+              action="https://jsonplaceholder.typicode.com/posts/"
               :on-preview="handlePreview"
               :on-remove="handleRemove"
-              list-type="picture"
-              :headers="headersObj"
-              :on-success="handlerSuccess"
-            >
+              :file-list="fileList"
+              list-type="picture">
               <el-button size="small" type="primary">点击上传</el-button>
               <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
             </el-upload>
+            <!-- <form action="/upload" method="post" enctype="multipart/form-data">
+              <h2>单图上传</h2>
+              <input type="file" name="logo">
+              <input type="submit" value="提交" @click="toimg">
+            </form> -->
           </el-tab-pane>
           <el-tab-pane label="商品内容" name="4">
-            {{cateList}}
             <!-- 富文本编辑器组件 -->
             <quill-editor v-model="addForm.goods_introduce"></quill-editor>
             <!-- 添加商品的按钮 -->
@@ -117,21 +117,25 @@ export default {
       // 步骤条下标
       activeIndex: '0',
       // tabs标签栏居左显示
-      tabPosition: 'left',
+      tabPosition: 'bottom',
+      fileList: [{
+        name: 'a.jpg',
+        url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg'
+      }],
       addForm: {
         userid: '',
         name: '',
-        price: 0,
-        weight: 0,
+        price: null,
+        shopname: '帽子',
         number: 0,
         // 商品所属的分类数组
         goods_cat: [],
         // 图片的数组
-        pics: [],
+        imgurl: [],
         // 商品详情描述
-        goods_introduce: '',
+        goods_introduce: ''
         // 动态参数和静态属性数组
-        attrs: []
+        // attrs: []
       },
       addFormRules: {
         // 验证用户名是否合法
@@ -141,7 +145,7 @@ export default {
         price: [
           { required: true, message: '请输入商品价格', trigger: 'blur' }
         ],
-        weight: [
+        shopname: [
           { required: true, message: '请输入商家名称', trigger: 'blur' }
         ],
         number: [
@@ -163,11 +167,11 @@ export default {
       manyTabelData: [],
       onlyTabelData: [],
       // 上传图片的url
-      uploadURL: 'http://127.0.0.1:8888/api/private/v1/upload',
+      uploadURL: 'http://127.0.0.1:3001/api/upload/img',
       // 图片上传组件的headers请求头对象
-      headersObj: {
-        Authorization: window.sessionStorage.getItem('token')
-      },
+      // headersObj: {
+      //   Authorization: window.sessionStorage.getItem('token')
+      // },
       // 预览路径
       previewPath: '',
       // 是否预览
@@ -177,6 +181,7 @@ export default {
   created() {
     // 解析token获取id
     const decoded = jwtdecode(window.sessionStorage.token)
+    this.addForm.userid = decoded.id
     console.log(decoded.shopname)
     this.getCatList()
   },
@@ -245,6 +250,8 @@ export default {
     },
     // 处理图片预览的操作
     handlePreview(file) {
+      console.log(file.path)
+      console.log(file.mimetype)
       this.previewPath = file.response.data.url
       this.previewVisable = true
     },
@@ -252,17 +259,20 @@ export default {
     handleRemove(file) {
       // 1.获取将要删除的图片的临时路径
       const filePath = file.response.data.tmp_path
-      // 2.从pics数组中，找到这个图片对应的索引值
-      const idx = this.addForm.pics.findIndex(x => x.pic === filePath)
-      // 3.调用数组的 splice 方法，把图片信息对象，从pics数组中移除
-      this.addForm.pics.splice(idx, 1)
+      console.log(file)
+      console.log(file.response)
+      // 2.从imgurl数组中，找到这个图片对应的索引值
+      const idx = this.addForm.imgurl.findIndex(x => x.pic === filePath)
+      // 3.调用数组的 splice 方法，把图片信息对象，从imgurl数组中移除
+      this.addForm.imgurl.splice(idx, 1)
     },
     // 监听图片上传成功的事件
     handlerSuccess(response) {
+      console.log(response)
       // 1.拼接得到一个图片信息对象
       const picInfo = { pic: response.data.tmp_path }
-      // 2.将图片信息对象push到pics数组中
-      this.addForm.pics.push(picInfo)
+      // 2.将图片信息对象push到imgurl数组中
+      this.addForm.imgurl.push(picInfo)
     },
     // 监听添加商品
     add() {
@@ -291,12 +301,13 @@ export default {
           this.addForm.attrs.push(newInfo)
         })
         form.attrs = this.addForm.attrs
+        console.log(form)
         // 添加商品
         const { data: res } = await this.$http.post(
-          'goods', form)
+          'api/allproduct/add', form)
         console.log(res)
         console.log(form)
-        if (res.meta.status !== 201) {
+        if (!res.allproduct) {
           return this.$message.error('添加商品失败！')
         }
         this.$message.success('添加商品成功！')
