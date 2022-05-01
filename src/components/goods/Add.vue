@@ -78,13 +78,17 @@
             <!-- action表示图片上传后台api地址 -->
             <el-upload
               class="upload-demo"
-              action="https://jsonplaceholder.typicode.com/posts/"
+              :action="uploadURL"
               :on-preview="handlePreview"
               :on-remove="handleRemove"
               :file-list="fileList"
+              :on-change='handleChange'
+              accept=".png,.jpg,.jpeg"
+              :on-success="handlerSuccess"
               list-type="picture">
               <el-button size="small" type="primary">点击上传</el-button>
               <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+            <i class="el-icon-plus"></i>
             </el-upload>
             <!-- <form action="/upload" method="post" enctype="multipart/form-data">
               <h2>单图上传</h2>
@@ -167,7 +171,7 @@ export default {
       manyTabelData: [],
       onlyTabelData: [],
       // 上传图片的url
-      uploadURL: 'http://127.0.0.1:3001/api/upload/img',
+      uploadURL: 'https://img.kuibu.net/upload/backblaze',
       // 图片上传组件的headers请求头对象
       // headersObj: {
       //   Authorization: window.sessionStorage.getItem('token')
@@ -201,7 +205,7 @@ export default {
         return this.$message.error('获取商品分类失败！')
       }
       this.cateList = res
-      console.log(this.cateList)
+      // console.log(this.cateList)
     },
     // 监听级联选择器变化
     parentCateChange() {
@@ -248,29 +252,45 @@ export default {
         this.onlyTabelData = res.data
       }
     },
+    modeUpload(item) {
+      console.log(item.file)
+      // const formData = new FormData()
+      // formData.append('files', item.file)
+      // console.log(formData)
+      // const { data: res } = this.$http.post(
+      //   'https://img.kuibu.net/upload/backblaze', item.file)
+      // console.log(res)
+    },
     // 处理图片预览的操作
     handlePreview(file) {
       console.log(file.path)
       console.log(file.mimetype)
       this.previewPath = file.response.data.url
       this.previewVisable = true
+      this.fileList.join({ name: '11', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg' })
     },
     // 处理图片移除的操作
     handleRemove(file) {
       // 1.获取将要删除的图片的临时路径
-      const filePath = file.response.data.tmp_path
-      console.log(file)
-      console.log(file.response)
+      // console.log(file)
+      console.log(file.response.url)
+      const filePath = file.response.url
       // 2.从imgurl数组中，找到这个图片对应的索引值
       const idx = this.addForm.imgurl.findIndex(x => x.pic === filePath)
       // 3.调用数组的 splice 方法，把图片信息对象，从imgurl数组中移除
       this.addForm.imgurl.splice(idx, 1)
     },
+    /**
+      * 文件上传change
+      */
+    handleChange(file, fileList) {
+      console.log(file)
+    },
     // 监听图片上传成功的事件
-    handlerSuccess(response) {
-      console.log(response)
+    handlerSuccess(response, file) {
+      console.log(file.response.url)
       // 1.拼接得到一个图片信息对象
-      const picInfo = { pic: response.data.tmp_path }
+      const picInfo = { pic: file.response.url }
       // 2.将图片信息对象push到imgurl数组中
       this.addForm.imgurl.push(picInfo)
     },

@@ -13,7 +13,7 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable @clear="getGoodsList">
-            <el-button slot="append" icon="el-icon-search" @click="getGoodsList"></el-button>
+            <el-button slot="append" icon="el-icon-search" @click="searchGoodsList"></el-button>
           </el-input>
         </el-col>
         <el-col :span="4">
@@ -21,8 +21,14 @@
         </el-col>
       </el-row>
       <!-- table表格区域 -->
-      <el-table :data="goodsList" border stripe>
-        <el-table-column type="index"></el-table-column>
+      <el-table :data="goodsList2" border stripe>
+        <el-table-column type="index" label="序号"></el-table-column>
+
+        <el-table-column label="图片预览" prop="imgurl[0].pic" width="95px">
+          <template slot-scope="scope">
+            <img :src="scope.row.imgurl[0].pic" alt="" width="90px"/>
+          </template>
+        </el-table-column>
         <el-table-column label="商品名称" prop="name"></el-table-column>
         <el-table-column label="商品价格（元）" width="95px" prop="price"></el-table-column>
         <el-table-column label="商品数量" prop="num" width="70px"></el-table-column>
@@ -34,7 +40,7 @@
         <el-table-column label="操作" width="135px">
           <template slot-scope="scope">
             <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
-            <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeById(scope.row.goods_id)"></el-button>
+            <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeById(scope.row._id)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -68,6 +74,7 @@ export default {
         pagesize: 5
       },
       goodsList: [],
+      goodsList2: [],
       total: 0
     }
   },
@@ -75,14 +82,13 @@ export default {
     this.getGoodsList()
   },
   methods: {
-    // 获取所有商品
-    // 根据分页获取对应的商品列表
-    async getGoodsList() {
+    // 搜索
+    async searchGoodsList() {
       // 解析token获取id
       const decoded = jwtdecode(window.sessionStorage.token)
       const userid = decoded.id
       // console.log(decoded.id)
-      const { data: res } = await this.$http.post('api/allproduct/getallmes', { userid: userid })
+      const { data: res } = await this.$http.post('api/allproduct/text', { userid: userid, name: this.queryInfo.query })
       // const { data: res } = await this.$http.get('api/allproduct/getallmes', {
       //   params: this.queryInfo
       // })
@@ -94,16 +100,55 @@ export default {
       this.goodsList = res
       console.log(res)
       this.total = this.goodsList.length
+      this.goodsList2 = this.goodsList.slice(0, 5)
+    },
+    // 获取所有商品
+    // 根据分页获取对应的商品列表
+    async getGoodsList() {
+      // 解析token获取id
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      // console.log(decoded.id)
+      // const pagesnum = this.queryInfo.pagenum * this.queryInfo.pagesize
+      // console.log(pagesnum)
+      const { data: res } = await this.$http.post('api/allproduct/getallmes', { userid: userid })
+      // const { data: res } = await this.$http.get('api/allproduct/getallmes', {
+      //   params: this.queryInfo
+      // })
+      // console.log(res)
+      if (!res) {
+        return this.$message.error('获取商品列表失败！')
+      }
+      this.$message.success('获取商品列表成功！')
+      this.goodsList = res
+      // console.log(res)
+      this.total = this.goodsList.length
+      this.goodsList2 = this.goodsList.slice(0, 5)
     },
     // 监听pageSize改变的事件
     handleSizeChange(newSize) {
+      // 获取改变的页码
+      const newPage = this.queryInfo.pagenum
+      const firstpagesnum = (newPage - 1) * newSize
+      const lastpagesnum = newPage * newSize
+      this.goodsList2 = this.goodsList.slice(firstpagesnum, lastpagesnum)
+      // 每页显示的数据改变
       this.queryInfo.pagesize = newSize
-      this.getGoodsList()
+      console.log(newSize)
     },
     // 监听页码值改变的事件
     handleCurrentChange(newPage) {
+      // console.log(newPage)
+      const newSize = this.queryInfo.pagesize
+      // console.log(newPage)
+      const firstpagesnum = (newPage - 1) * newSize
+      // console.log(firstpagesnum)
+      const lastpagesnum = newPage * newSize
+      // console.log(lastpagesnum)
+      this.goodsList2 = this.goodsList.slice(firstpagesnum, lastpagesnum)
+      // 页码改变
       this.queryInfo.pagenum = newPage
-      this.getGoodsList()
+      // this.getGoodsList()
     },
     // 根据id删除对应商品
     async removeById(id) {
@@ -118,8 +163,12 @@ export default {
       if (result !== 'confirm') {
         return this.$message.info('已取消了删除！')
       }
-      const { data: res } = await this.$http.delete('goods/' + id)
-      if (res.meta.status !== 200) {
+      console.log(id)
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      const { data: res } = await this.$http.post('api/allproduct/delete', { _id: id, userid: userid })
+      console.log(res)
+      if (!res) {
         return this.$message.error('删除商品失败！')
       }
       this.$message.success('该商品成功删除！')

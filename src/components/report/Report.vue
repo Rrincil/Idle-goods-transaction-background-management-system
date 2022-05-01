@@ -1,5 +1,6 @@
 <template>
   <div>
+    {{dada}}
     <!-- 面包屑导航区域 -->
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
@@ -46,6 +47,7 @@ export default {
             boundaryGap: false
           }
         ],
+        dada: null,
         yAxis: [
           {
             type: 'value'
@@ -59,9 +61,11 @@ export default {
     // 3.基于准备好的dom，初始化echarts实例
     var myChart = echarts.init(document.getElementById('main'))
     const { data: res } = await this.$http.get('reports/type/1')
+    console.log(res)
     if (res.meta.status !== 200) {
       return this.$message.error('获取折线图数据失败！')
     }
+    this.dada = res.data
     // 4.准备数据和配置项(res.data)
     const result = _.merge(res.data, this.options)
     // 5.使用刚指定的配置项和数据显示图表。
