@@ -1,6 +1,6 @@
 <template>
   <div>
-    {{userList}}
+    <!-- {{userList}} -->
     <!-- 面包屑导航区域 -->
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
@@ -36,14 +36,14 @@
           <template slot-scope="scope">
             <!-- 修改按钮 -->
             <el-button
-              @click="showEditDialog(scope.row.id)"
+              @click="showEditDialog(scope.row._id)"
               type="primary"
               icon="el-icon-edit"
               size="mini"
             ></el-button>
             <!-- 删除按钮 -->
             <el-button
-              @click="removeUserById(scope.row.id)"
+              @click="removeUserById(scope.row._id)"
               type="danger"
               icon="el-icon-delete"
               size="mini"
@@ -76,8 +76,8 @@
           <el-input v-model="addForm.username"></el-input>
         </el-form-item>
         <!-- 密码 -->
-        <el-form-item prop="password" label="密码">
-          <el-input v-model="addForm.password"></el-input>
+        <el-form-item prop="sex" label="性别">
+          <el-input v-model="addForm.sex"></el-input>
         </el-form-item>
         <!-- 邮箱 -->
         <el-form-item prop="email" label="邮箱">
@@ -115,7 +115,7 @@
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
         <el-button @click="editDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editUser">确 定</el-button>
+        <el-button type="primary" @click="editUser(editForm)">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -179,12 +179,14 @@ export default {
       // 添加用户的表单数据
       addForm: {
         username: '',
-        password: '',
+        sex: '男',
         email: '',
-        mobile: ''
+        mobile: '',
+        role_name: '超级管理员'
       },
       // 查询到的用户信息对象
-      editForm: {},
+      editForm: {
+      },
       // 添加表单的验证规则对象
       addFormRules: {
         // 验证用户名是否合法
@@ -193,13 +195,13 @@ export default {
           { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
         ],
         // 验证密码是否合法
-        password: [
-          { required: true, message: '请输入登录密码', trigger: 'blur' },
-          { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+        sex: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 1, max: 1, message: '长度 1个字符', trigger: 'blur' }
         ],
         // 验证邮箱是否合法
         email: [
-          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          { required: false, message: '请输入邮箱', trigger: 'blur' },
           { validator: checkEmail, trigger: 'blur' }
         ],
         // 验证手机是否合法
@@ -217,7 +219,7 @@ export default {
         ],
         // 验证邮箱是否合法
         email: [
-          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          { required: false, message: '请输入邮箱', trigger: 'blur' },
           { validator: checkEmail, trigger: 'blur' }
         ],
         // 验证手机是否合法
@@ -241,14 +243,17 @@ export default {
   },
   methods: {
     async getUserList() {
-      const { data: res } = await this.$http.get('users', {
-        params: this.queryInfo
-      })
-      if (res.meta.status !== 200) {
+      const { data: res } = await this.$http.get('api/userlist/getallmes')
+      // const { data: res } = await this.$http.get('api/userlist/getallmes', {
+      //   params: this.queryInfo
+      // })
+      // console.log(res)
+      if (!res) {
         return this.$message.error('获取用户列表失败！')
       }
-      this.userList = res.data.users
-      this.total = res.data.total
+      // console.log(res)
+      this.userList = res
+      this.total = this.userList.length
       // console.log(res)
     },
     // 监听pageSize改变的事件
@@ -285,8 +290,9 @@ export default {
       this.$refs.addFormRef.validate(async valid => {
         // console.log(valid)
         if (!valid) return 0
-        const { data: res } = await this.$http.post('users', this.addForm)
-        if (res.meta.status !== 201) {
+        const { data: res } = await this.$http.post('api/userlist/add', this.addForm)
+        console.log(res)
+        if (!res) {
           return this.$message.error('添加用户失败！')
         }
         this.$message.success('添加用户成功！')
@@ -299,23 +305,27 @@ export default {
     },
     // 点击修改按钮，展示修改页面对话框
     async showEditDialog(id) {
-      const { data: res } = await this.$http.get('users/' + id)
-      if (res.meta.status !== 200) {
+      const { data: res } = await this.$http.post('api/userlist/findone', { _id: id })
+      if (!res) {
         return this.$message.error('查询用户信息失败！')
       }
-      this.editForm = res.data
+      console.log(res)
+      this.editForm = res
       this.editDialogVisible = true
     },
     // 点击按钮编辑当前用户
-    editUser() {
+    editUser(editForm) {
       this.$refs.editFormRef.validate(async valid => {
         // console.log(valid)
         if (!valid) return 0
-        const { data: res } = await this.$http.put(
-          'users/' + this.editForm.id,
-          { email: this.editForm.email, mobile: this.editForm.mobile }
+        console.log(this.editForm)
+        this.editForm = editForm
+        const { data: res } = await this.$http.post(
+          'api/userlist/adduserlist',
+          { _id: this.editForm._id, userlist: this.editForm }
         )
-        if (res.meta.status !== 200) {
+        console.log(this.editForm)
+        if (!res) {
           return this.$message.error('修改用户失败！')
         }
         this.$message.success('更新用户信息成功！')
@@ -339,10 +349,11 @@ export default {
       if (result !== 'confirm') {
         return this.$message.info('已取消了删除！')
       }
-      const { data: res } = await this.$http.delete('users/' + id)
-      if (res.meta.status !== 200) {
+      const { data: res } = await this.$http.post('api/userlist/delete', { _id: id })
+      if (!res) {
         return this.$message.error('删除用户失败！')
       }
+      console.log(res)
       this.$message.success('用户信息成功删除！')
       this.getUserList()
     },
