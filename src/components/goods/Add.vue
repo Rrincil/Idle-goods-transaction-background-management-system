@@ -209,12 +209,12 @@ export default {
     },
     // 监听级联选择器变化
     parentCateChange() {
-      if (this.addForm.goods_cat.length !== 3) {
-        this.addForm.goods_cat = []
-      }
+      // if (this.addForm.goods_cat.length !== 3) {
+      //   this.addForm.goods_cat = []
+      // }
     },
     beforeTabLeave(activeName, oldActiveName) {
-      if (oldActiveName === '0' && this.addForm.goods_cat.length !== 3) {
+      if (this.addForm.goods_cat.length === 0) {
         this.$message.error('请先选择商品分类！')
         return false
       }

@@ -183,10 +183,11 @@ export default {
     },
     // 添加分类按钮
     addCate() {
-      console.log(this.addCateForm)
       this.$refs.addCateFormRef.validate(async valid => {
+        console.log(this.addCateForm)
+        console.log(this.selectedKeys[0])
         if (!valid) return
-        const { date: res } = await this.$http.post('api/categorie/add', this.addCateForm)
+        const { date: res } = await this.$http.post('api/categorie/find', { cat_id: this.selectedKeys[0] })
         if (!res) {
           return this.$message.error('添加分类数据失败！')
         }
