@@ -51,8 +51,8 @@ module.exports = {
         '/api': {
             // target:'https://www.liulongbin.top:8888/api/private/v1/',
             // target: 'http://101.201.220.43/api',
-            // target: 'http://101.201.220.43:3001/api',
-            target: 'http://localhost:3001/api',//这里后台的地址模拟的;应该填写你们真实的后台接口
+            target: 'http://101.201.220.43:3001/api',
+            // target: 'http://localhost:3001/api',//这里后台的地址模拟的;应该填写你们真实的后台接口
             ws: true,
             changOrigin: true,//允许跨域
             pathRewrite: {
