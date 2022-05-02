@@ -122,10 +122,7 @@ export default {
       activeIndex: '0',
       // tabs标签栏居左显示
       tabPosition: 'bottom',
-      fileList: [{
-        name: 'a.jpg',
-        url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg'
-      }],
+      fileList: [],
       addForm: {
         userid: '',
         name: '',
@@ -284,11 +281,11 @@ export default {
       * 文件上传change
       */
     handleChange(file, fileList) {
-      console.log(file)
+      // console.log(file)
     },
     // 监听图片上传成功的事件
     handlerSuccess(response, file) {
-      console.log(file.response.url)
+      // console.log(file.response.url)
       // 1.拼接得到一个图片信息对象
       const picInfo = { pic: file.response.url }
       // 2.将图片信息对象push到imgurl数组中
@@ -322,11 +319,14 @@ export default {
         })
         form.attrs = this.addForm.attrs
         console.log(form)
+        if (form.imgurl == null) {
+          form.imgurl.push('https://b2.kuibu.net/file/imgdisk/imgs/2022/05/f8249b861db55b55.jpg')
+        }
         // 添加商品
         const { data: res } = await this.$http.post(
           'api/allproduct/add', form)
-        console.log(res)
-        console.log(form)
+        // console.log(res)
+        // console.log(form)
         if (!res.allproduct) {
           return this.$message.error('添加商品失败！')
         }
