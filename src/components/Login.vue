@@ -69,7 +69,7 @@ export default {
         if (!res) return this.$message.error('登录失败！')
         this.$message.success('登录成功！')
         // console.log(res.token)
-        console.log(res)
+        // console.log(res)
         window.sessionStorage.setItem('token', res.token)
         // console.log(res.data.token)
         this.$router.push('/home')

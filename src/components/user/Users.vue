@@ -186,6 +186,9 @@ export default {
       },
       // 查询到的用户信息对象
       editForm: {
+        username: '',
+        email: '',
+        mobile: ''
       },
       // 添加表单的验证规则对象
       addFormRules: {
@@ -309,14 +312,14 @@ export default {
       if (!res) {
         return this.$message.error('查询用户信息失败！')
       }
-      console.log(res)
+      // console.log(res)
       this.editForm = res
       this.editDialogVisible = true
     },
     // 点击按钮编辑当前用户
     editUser(editForm) {
       this.$refs.editFormRef.validate(async valid => {
-        // console.log(valid)
+        console.log(valid)
         if (!valid) return 0
         console.log(this.editForm)
         this.editForm = editForm
@@ -324,7 +327,6 @@ export default {
           'api/userlist/adduserlist',
           { _id: this.editForm._id, userlist: this.editForm }
         )
-        console.log(this.editForm)
         if (!res) {
           return this.$message.error('修改用户失败！')
         }

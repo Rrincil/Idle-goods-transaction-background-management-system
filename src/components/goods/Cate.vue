@@ -26,9 +26,9 @@
           <el-tag v-else type="warning">三级</el-tag>
         </template>
         <!-- 操作 -->
-        <template slot="opt" slot-scope="">
+        <template slot="opt" slot-scope="scope">
           <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
-          <el-button type="danger" icon="el-icon-delete" size="mini">编辑</el-button>
+          <el-button type="danger" icon="el-icon-delete" size="mini" @click="removecate(scope.row._id)">删除</el-button>
         </template>
       </tree-table>
       <!-- 分页区域 -->
@@ -68,6 +68,7 @@
 </template>
 
 <script>
+import jwtdecode from 'jwt-decode'
 export default {
   data() {
     return {
@@ -135,10 +136,13 @@ export default {
   methods: {
     // 获取商品分类数据
     async getCateList() {
-      const { data: res } = await this.$http.get('api/categorie/getallmes', { params: this.queryInfo })
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      const { data: res } = await this.$http.post('api/categorie/getallmes', { userid: userid })
       if (!res) {
         return this.$message.error('获取商品分类失败！')
       }
+      console.log(res)
       this.cateList = res
       this.total = this.cateList.length
     },
@@ -160,12 +164,12 @@ export default {
     },
     // 获取父级分类的数据列表
     async getParentCateList() {
-      const { data: res } = await this.$http.get('api/categorie/getallmes')
+      // const { data: res } = await this.$http.get('api/categorie/getallmes')
       // const { data: res } = await this.$http.get('api/categorie/getallmes', { params: { type: 2 } })
-      if (!res) {
-        return this.$message.error('获取父级分类数据失败！')
-      }
-      this.parentCateList = res
+      // if (!res) {
+      //   return this.$message.error('获取父级分类数据失败！')
+      // }
+      this.parentCateList = this.cateList
     },
     // 监听选择项变化事件
     parentCateChange() {
@@ -185,9 +189,12 @@ export default {
     addCate() {
       this.$refs.addCateFormRef.validate(async valid => {
         console.log(this.addCateForm)
-        console.log(this.selectedKeys[0])
+        console.log(this.selectedKeys)
+        const catid = this.selectedKeys[0]
+        const decoded = jwtdecode(window.sessionStorage.token)
+        const userid = decoded.id
         if (!valid) return
-        const { date: res } = await this.$http.post('api/categorie/find', { cat_id: this.selectedKeys[0] })
+        const { data: res } = await this.$http.post('api/categorie/finds', { cat_id: catid, userid: userid })
         if (!res) {
           return this.$message.error('添加分类数据失败！')
         }
@@ -203,6 +210,29 @@ export default {
       this.selectedKeys = []
       this.addCateForm.cat_pid = 0
       this.addCateForm.cat_level = 0
+    },
+    async removecate(id) {
+      // 弹窗询问用户是否删除
+      const result = await this.$confirm('此操作将永久删除该商品, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
+      // 如果用户确认删除，则返回值为字符串confirm
+      // console.log(res)
+      if (result !== 'confirm') {
+        return this.$message.info('已取消了删除！')
+      }
+      // console.log(id)
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      const { data: res } = await this.$http.post('api/allproduct/delete', { _id: id, userid: userid })
+      // console.log(res)
+      if (!res) {
+        return this.$message.error('删除商品失败！')
+      }
+      this.$message.success('该商品成功删除！')
+      this.getGoodsList()
     }
   }
 

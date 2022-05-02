@@ -183,7 +183,7 @@ export default {
     // 解析token获取id
     const decoded = jwtdecode(window.sessionStorage.token)
     this.addForm.userid = decoded.id
-    console.log(decoded.shopname)
+    // console.log(decoded.shopname)
     this.getCatList()
   },
   computed: {
@@ -319,8 +319,9 @@ export default {
         })
         form.attrs = this.addForm.attrs
         console.log(form)
-        if (form.imgurl == null) {
-          form.imgurl.push('https://b2.kuibu.net/file/imgdisk/imgs/2022/05/f8249b861db55b55.jpg')
+        if (!form.imgurl.length) {
+          const picInfo2 = { pic: 'https://b2.kuibu.net/file/imgdisk/imgs/2022/05/548567f17dd0a59b.png' }
+          form.imgurl.push(picInfo2)
         }
         // 添加商品
         const { data: res } = await this.$http.post(

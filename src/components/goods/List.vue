@@ -20,6 +20,44 @@
           <el-button type="primary" @click="goAddPage">添加商品</el-button>
         </el-col>
       </el-row>
+      <!-- 修改商品的对话框 -->
+      <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="45%" @close="editDialogClosed">
+        <!-- 内容主体区域 -->
+        <el-form ref="editFormRef" :model="editForm"  label-width="70px">
+          <!-- 用户名 -->
+          <el-form-item label="商品名" prop="name">
+            <el-input v-model="editForm.name" disabled></el-input>
+          </el-form-item>
+          <!-- 邮箱 -->
+          <el-form-item prop="num" label="数量">
+            <el-input v-model="editForm.num"></el-input>
+          </el-form-item>
+          <!-- 手机 -->
+          <el-form-item prop="price" label="价格">
+            <el-input v-model="editForm.price"></el-input>
+          </el-form-item>
+          <el-upload
+            class="upload-demo"
+            :action="uploadURL"
+            :on-preview="handlePreview"
+            :before-remove="beforeremove"
+            :on-remove="handleRemove"
+            :file-list="fileList"
+            :on-change='handleChange'
+            accept=".png,.jpg,.jpeg"
+            :on-success="handlerSuccess"
+            list-type="picture">
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+          <i class="el-icon-plus"></i>
+          </el-upload>
+        </el-form>
+        <!-- 底部区域 -->
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="editDialogVisible2()" >取 消</el-button>
+          <el-button type="primary" @click="editUser(editForm)">确 定</el-button>
+        </span>
+      </el-dialog>
       <!-- table表格区域 -->
       <el-table :data="goodsList2" border stripe>
         <el-table-column type="index" label="序号"></el-table-column>
@@ -39,7 +77,7 @@
         </el-table-column>
         <el-table-column label="操作" width="135px">
           <template slot-scope="scope">
-            <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
+            <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row._id)"></el-button>
             <el-button type="danger" icon="el-icon-delete" size="mini" @click="removeById(scope.row._id)"></el-button>
           </template>
         </el-table-column>
@@ -75,13 +113,38 @@ export default {
       },
       goodsList: [],
       goodsList2: [],
-      total: 0
+      // 控制修改用户对话框的显示与隐藏
+      editDialogVisible: false,
+      // 查询到的用户信息对象
+      editForm: {
+        name: '',
+        num: '',
+        price: ''
+      },
+      total: 0,
+      // 上传图片的url
+      uploadURL: 'https://img.kuibu.net/upload/backblaze',
+      // 图片上传组件的headers请求头对象
+      // headersObj: {
+      //   Authorization: window.sessionStorage.getItem('token')
+      // },
+      // 预览路径
+      previewPath: '',
+      // 是否预览
+      previewVisable: false,
+      fileList: [],
+      picInfo22: null
     }
   },
   created() {
     this.getGoodsList()
   },
   methods: {
+    // 监听修改用户对话框的关闭事件
+    editDialogClosed() {
+      this.fileList = []
+      // this.$refs.editFormRef.resetFields()
+    },
     // 搜索
     async searchGoodsList() {
       // 解析token获取id
@@ -98,7 +161,7 @@ export default {
       }
       this.$message.success('获取商品列表成功！')
       this.goodsList = res
-      console.log(res)
+      // console.log(res)
       this.total = this.goodsList.length
       this.goodsList2 = this.goodsList.slice(0, 5)
     },
@@ -163,11 +226,11 @@ export default {
       if (result !== 'confirm') {
         return this.$message.info('已取消了删除！')
       }
-      console.log(id)
+      // console.log(id)
       const decoded = jwtdecode(window.sessionStorage.token)
       const userid = decoded.id
       const { data: res } = await this.$http.post('api/allproduct/delete', { _id: id, userid: userid })
-      console.log(res)
+      // console.log(res)
       if (!res) {
         return this.$message.error('删除商品失败！')
       }
@@ -177,6 +240,114 @@ export default {
     // 点击添加商品按钮，通过编程式导航跳转到添加商品页面
     goAddPage() {
       this.$router.push('/goods/add')
+    },
+    // 点击取消编辑
+    editDialogVisible2() {
+      this.editDialogVisible = false
+      this.fileList = []
+    },
+    // 点击修改按钮，展示修改页面对话框
+    async showEditDialog(id) {
+      const { data: res } = await this.$http.post('api/allproduct/findone', { _id: id })
+      if (!res) {
+        return this.$message.error('查询用户信息失败！')
+      }
+      // console.log(res)
+      this.editForm = res
+      this.editForm.imgurl.map(re => {
+        // console.log(re)
+        const picInfo = { url: re.pic }
+        this.fileList.push(picInfo)
+      })
+      // console.log(this.fileList)
+      this.editDialogVisible = true
+    },
+    // 点击按钮编辑当前用户
+    editUser(editForm) {
+      // if (this.picInfo22) {
+      this.$refs.editFormRef.validate(async valid => {
+        // console.log(valid)
+        if (!valid) return 0
+        // console.log(this.editForm)
+        // this.editForm = editForm
+        const { data: res } = await this.$http.post(
+          'api/allproduct/addallproduct',
+          { _id: this.editForm._id, allproduct: this.editForm }
+        )
+        // console.log(res)
+        if (!res) {
+          return this.$message.error('修改用户失败！')
+        }
+        this.$message.success('更新用户信息成功！')
+        // console.log(res)
+        // 隐藏添加用户的对话框
+        this.editDialogVisible = false
+        // 图片清零
+        this.fileList = []
+        // 重新获取用户列表数据
+        this.getGoodsList()
+      })
+      // }
+      // else {
+      //   this.$message.error('图片尚未上传成功！')
+      // }
+    },
+    // 处理图片预览的操作
+    handlePreview(file) {
+      // console.log(file.path)
+      // console.log(file.mimetype)
+      // console.log(file)
+      // if (file) {
+      this.previewPath = this.fileList.url
+      // } else {
+      //   this.previewPath = this.fileList.pic
+      // }
+      this.previewVisable = true
+      this.fileList.join({ name: '11', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg' })
+    },
+    beforeremove() {
+      if (this.editForm.imgurl.length === 1) {
+        this.$message.error('不能删除最后一张图片！')
+        return false
+      } else {
+        return true
+      }
+    },
+    // 处理图片移除的操作
+    handleRemove(file) {
+      // 1.获取将要删除的图片的临时路径
+      if (this.fileList.length > 1) {
+        const filePath = file.url
+        // console.log(filePath)
+        // 2.从imgurl数组中，找到这个图片对应的索引值
+        const idx = this.editForm.imgurl.findIndex(x => x.pic === filePath)
+        const idx2 = this.fileList.findIndex(x => x.pic === filePath)
+        // 3.调用数组的 splice 方法，把图片信息对象，从imgurl数组中移除
+        this.fileList.splice(idx2, 1)
+        this.editForm.imgurl.splice(idx, 1)
+        console.log(this.fileList)
+        console.log(this.editForm.imgurl)
+      }
+      this.handlePreview()
+      // console.log(idx)
+      // this.fileList = this.editForm.imgurl
+    },
+    /**
+      * 文件上传change
+      */
+    handleChange(file, fileList) {
+      // console.log(file)
+    },
+    // 监听图片上传成功的事件
+    handlerSuccess(response, file) {
+      console.log(file.response.url)
+      // 1.拼接得到一个图片信息对象
+      const picInfo = { pic: file.response.url }
+      this.picInfo22 = picInfo
+      // 2.将图片信息对象push到imgurl数组中
+      this.editForm.imgurl.push(picInfo)
+      // const picInfo2 = { url: file.response.url }
+      // this.fileList.push(picInfo2)
     }
   }
 }
