@@ -197,7 +197,9 @@ export default {
   methods: {
     // 获取所有商品分类列表
     async getCatList() {
-      const { data: res } = await this.$http.get('api/categorie/getallmes')
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      const { data: res } = await this.$http.post('api/categorie/getallmes', { userid: userid })
       if (!res) {
         return this.$message.error('获取商品分类失败！')
       }

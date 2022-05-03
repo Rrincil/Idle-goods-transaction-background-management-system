@@ -51,6 +51,10 @@
         <el-form-item label="分类名称：" prop="cat_name">
           <el-input v-model="addCateForm.cat_name"></el-input>
         </el-form-item>
+        <!-- 分类参数 -->
+        <el-form-item label="分类参数：" prop="cateparams">
+          <el-input v-model="addCateForm.cateparams"></el-input>
+        </el-form-item>
         <!-- 邮箱 -->
         <el-form-item  label="父级分类：">
           <!-- options用来指定数据源 -->
@@ -61,7 +65,7 @@
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
         <el-button @click="addCateDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addCate">确 定</el-button>
+        <el-button type="primary" @click="addCate(addCateForm)">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -142,7 +146,7 @@ export default {
       if (!res) {
         return this.$message.error('获取商品分类失败！')
       }
-      console.log(res)
+      // console.log(res)
       this.cateList = res
       this.total = this.cateList.length
     },
@@ -186,15 +190,20 @@ export default {
       }
     },
     // 添加分类按钮
-    addCate() {
+    addCate(addCateForm) {
       this.$refs.addCateFormRef.validate(async valid => {
-        console.log(this.addCateForm)
+        console.log(addCateForm.cat_name)
         console.log(this.selectedKeys)
         const catid = this.selectedKeys[0]
+        // 2.从imgurl数组中，找到这个图片对应的索引值
+        const idx = this.cateList.findIndex(x => x.cat_id === catid)
+        // 3.调用数组的 splice 方法，把图片信息对象，从imgurl数组中移除
+        console.log(this.cateList[idx])
         const decoded = jwtdecode(window.sessionStorage.token)
         const userid = decoded.id
+        const catid2 = 2200 + this.cateList.length
         if (!valid) return
-        const { data: res } = await this.$http.post('api/categorie/finds', { cat_id: catid, userid: userid })
+        const { data: res } = await this.$http.post('api/categorie/add', { cat_name: addCateForm.cat_name, cateparams: addCateForm.cateparams, userid: userid, cateList: this.addCateForm, cat_id: catid2 })
         if (!res) {
           return this.$message.error('添加分类数据失败！')
         }
@@ -223,16 +232,19 @@ export default {
       if (result !== 'confirm') {
         return this.$message.info('已取消了删除！')
       }
-      // console.log(id)
+      console.log(id)
+      const _id = id
       const decoded = jwtdecode(window.sessionStorage.token)
       const userid = decoded.id
-      const { data: res } = await this.$http.post('api/allproduct/delete', { _id: id, userid: userid })
+      console.log(userid)
+      const { data: res } = await this.$http.post('api/allproduct/delete', { _id: _id, userid: userid })
       // console.log(res)
       if (!res) {
         return this.$message.error('删除商品失败！')
       }
+      console.log(res)
       this.$message.success('该商品成功删除！')
-      this.getGoodsList()
+      this.getCateList()
     }
   }
 

@@ -9,21 +9,31 @@
     <!-- 卡片视图 -->
     <el-card>
       <!-- 警告区域 -->
-      <el-alert type="warning" title="注意：只允许为第三级分类设置相关参数" :closable="false" show-icon></el-alert>
+      <el-alert type="warning" title="注意：只需为第一级分类设置相关参数" :closable="false" show-icon></el-alert>
       <!-- 选择商品分类区域 -->
       <el-row class="cat_opt">
         <el-col>
           <span>选择商品分类：</span>
           <!-- 选择商品分类的级联选择框 -->
-          <el-cascader
+          <el-select v-model="catvalue" placeholder="请选择">
+            <el-option
+              v-for="item in cateList"
+              :key="item"
+              :label="item.label"
+              :value="item.cat_name"
+              @change="parentCateChange"
+              >
+            </el-option>
+          </el-select>
+          <!-- <el-cascader
             expandTrigger="hover"
             :options="cateList"
-            v-model="selectedKeys"
+            v-model="value"
             :props="cateProps"
             @change="parentCateChange"
             clearable
             checkStrictly
-          ></el-cascader>
+          ></el-cascader> -->
         </el-col>
       </el-row>
       <!-- tab 页签区域 -->
@@ -184,11 +194,13 @@
 </template>
 
 <script>
+import jwtdecode from 'jwt-decode'
 export default {
   data() {
     return {
       // 商品分类列表
       cateList: [],
+      catvalue: null,
       // 级联选择框的配置对象
       cateProps: {
         value: 'cat_id',
@@ -196,7 +208,7 @@ export default {
         children: 'children'
       },
       // 选中的父级分类的id数组
-      selectedKeys: [],
+      // value: [],
       // 激活的页签名字
       activeName: 'many',
       // 动态参数的数据
@@ -229,15 +241,15 @@ export default {
   computed: {
     // 如果按钮按钮需要被禁用，则返回true，否则返回false
     isBtnDisabled() {
-      if (this.selectedKeys.length !== 3) {
+      if (this.catvalue === null) {
         return true
       }
       return false
     },
     // 当前选中的三级分类的id
     cateId() {
-      if (this.selectedKeys.length === 3) {
-        return this.selectedKeys[2]
+      if (this.catvalue !== null) {
+        return this.catvalue
       }
       return null
     },
@@ -252,14 +264,19 @@ export default {
   methods: {
     // 获取所有商品分类列表
     async getCatList() {
-      const { data: res } = await this.$http.get('api/categorie/getallmes')
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      console.log(userid)
+      const { data: res } = await this.$http.post('api/categorie/getallmes', { userid: userid })
       if (!res) {
         return this.$message.error('获取商品分类失败！')
       }
       this.cateList = res
+      console.log(this.cateList)
     },
     // 监听选择项变化事件
     parentCateChange() {
+      // console.log(111)
       this.getParamsData()
     },
     // tab 页签点击事件的处理函数
@@ -268,20 +285,15 @@ export default {
     },
     // 获取参数的列表数据
     async getParamsData() {
-      // 如果selectedKeys数组长度不等于3，证明选择的不是三级分类
-      if (this.selectedKeys.length !== 3) {
-        this.selectedKeys = []
-        this.manyTabelData = []
-        this.onlyTabelData = []
-      }
       // 选中的是3级分类，则根据所选id和name获取对应的参数
+      console.log(this.catvalue)
       const { data: res } = await this.$http.get(
-        `categories/${this.cateId}/attributes`,
+        'api/categorie/getparams',
         {
-          params: { sel: this.activeName }
+          cat_name: this.catvalue
         }
       )
-      if (res.meta.status !== 200) {
+      if (!res) {
         return this.$message.error('获取参数列表失败！')
       }
       // 将attr_vals通过空格进行分割，然后得到数组
@@ -292,11 +304,12 @@ export default {
         item.inputValue = ''
       })
       // this.$message.success('获取参数列表成功！')
-      if (this.activeName === 'many') {
-        this.manyTabelData = res.data
-      } else {
-        this.onlyTabelData = res.data
-      }
+      // if (this.activeName === 'many') {
+      //   this.manyTabelData = res.data
+      // } else {
+      //   this.onlyTabelData = res.data
+      // }
+      this.manyTabelData = res
     },
     // 监听添加对话框的关闭事件
     addDialogClosed() {
@@ -307,19 +320,21 @@ export default {
     },
     // 监听确定按钮，添加参数
     addParams() {
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      const filePath = this.catvalue
+      // 2.从imgurl数组中，找到这个图片对应的索引值
+      const idx = this.cateList.findIndex(x => x.cat_name === filePath)
+      console.log(this.cateList[idx]._id)
+      const a = { _id: this.cateList[idx]._id, userid: userid, attr_name: this.addForm.attr_name }
+      // attr_sel: this.activeName
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return
-        const { date: res } = await this.$http.post(
-          `categories/${this.cateId}/attributes`,
-          {
-            attr_name: this.addForm.attr_name,
-            attr_sel: this.activeName
-          }
-        )
+        const { res } = await this.$http.post('api/categorie/addcateparams', a)
         console.log(res)
-        /* if (res.meta.status !== 201) {
+        if (!res) {
           return this.$message.error('添加参数失败！')
-        } */
+        }
         this.$message.success('添加参数成功！')
         this.getParamsData()
         this.addDialogVisible = false
@@ -389,6 +404,7 @@ export default {
     // 文本框失去焦点或按下enter都会触发
     handleInputConfirm(row) {
       if (row.inputValue === '') {
+        console.log(1111)
         row.inputValue = ''
         row.inputVisible = false
       }
@@ -409,6 +425,7 @@ export default {
     // 保存attr_vals到数据库
     async saveAttrVals(row) {
       // 将新加入的标签通过http请求存入数据库中
+      console.log(row)
       const { data: res } = await this.$http.put(
         `categories/${this.cateId}/attributes/${row.attr_id}`,
         {
