@@ -1,6 +1,6 @@
 <template>
   <div>
-    {{rolesList}}
+    <!-- {{rolesList}} -->
     <!-- 面包屑导航区域 -->
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
@@ -79,6 +79,7 @@
 </template>
 
 <script>
+// import jwtdecode from 'jwt-decode'
 export default {
   data() {
     return {
@@ -105,11 +106,12 @@ export default {
   methods: {
     // 获取所有角色的列表
     async getRolesList() {
-      const { data: res } = await this.$http.get('roles')
-      if (res.meta.status !== 200) {
-        return this.$message.error('获取权限列表失败！')
-      }
-      this.rolesList = res.data
+      // const { data: res } = await this.$http.get('roles')
+      // if (res.meta.status !== 200) {
+      //   return this.$message.error('获取权限列表失败！')
+      // }
+      // const decoded = jwtdecode(window.sessionStorage.token)
+      // this.rolesList = decoded
     },
     // 根据id删除对应的权限
     async removeRightById(role, id) {

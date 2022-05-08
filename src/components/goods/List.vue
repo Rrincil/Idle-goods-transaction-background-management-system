@@ -42,6 +42,7 @@
             :on-preview="handlePreview"
             :before-remove="beforeremove"
             :on-remove="handleRemove"
+            :auto-upload='false'
             :file-list="fileList"
             :on-change='handleChange'
             accept=".png,.jpg,.jpeg"
@@ -63,11 +64,12 @@
         <el-table-column type="index" label="序号"></el-table-column>
 
         <el-table-column label="图片预览" prop="imgurl[0].pic" width="95px">
-          <template slot-scope="scope">
-            <img :src="scope.row.imgurl[0].pic" alt="" width="90px"/>
+          <template slot-scope="scope" v-lazy>
+            <img :src="scope.row.imgurl[0].pic" class="imgurl"/>
           </template>
         </el-table-column>
-        <el-table-column label="商品名称" prop="name"></el-table-column>
+        <el-table-column label="商品名称" prop="name">
+        </el-table-column>
         <el-table-column label="商品价格（元）" width="95px" prop="price"></el-table-column>
         <el-table-column label="商品数量" prop="num" width="70px"></el-table-column>
         <el-table-column label="创建时间" prop="data" width="140px">
@@ -336,7 +338,30 @@ export default {
       * 文件上传change
       */
     handleChange(file, fileList) {
+      // 获取地址
+      const name3 = document.getElementsByClassName('el-upload__input')[0].files[0]
+      // const name1 = document.getElementsByClassName('el-upload__input')[0].value
+      // const name2 = document.getElementsByClassName('el-upload__input')[0].accept.split(',.')[1]
+      // console.log(name1)
+      // file.path = name1
+      // file.mimetype = name2
+      // console.log(name3)
+      const formData = new FormData()
+      formData.append('test', name3)
       // console.log(file)
+      // const config = {
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data'
+      //   }
+      // }
+      this.$http.post('api/upload/img', formData).then(res => {
+        if (!res) {
+          return this.$message.error('获上传失败失败！')
+        }
+        // console.log(res.data)
+        this.fileList.push({ url: res.data })
+        this.editForm.imgurl.push({ pic: res.data })
+      })
     },
     // 监听图片上传成功的事件
     handlerSuccess(response, file) {
@@ -354,4 +379,8 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.imgurl{
+  width: 80px;
+  height: 80px;
+}
 </style>

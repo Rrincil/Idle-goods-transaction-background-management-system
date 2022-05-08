@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{orderList}}
     <!-- 面包屑导航区域 -->
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
@@ -20,17 +19,27 @@
       <!-- 订单列表区域 -->
       <el-table :data="orderList" border stripe>
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="订单编号" prop="order_number"></el-table-column>
-        <el-table-column label="订单价格" prop="order_price"></el-table-column>
-        <el-table-column label="是否付款" prop="pay_status">
+        <el-table-column label="订单编号" prop="serialNo"></el-table-column>
+        <el-table-column label="订单价格" prop="price"></el-table-column>
+        <el-table-column label="是否付款" prop="ispay">
           <template slot-scope="scope">
-            <el-tag type="success" v-if="scope.row.pay_status === '1'">已付款</el-tag>
+            <el-tag type="success" v-if="scope.row.ispay === '1'">已付款</el-tag>
             <el-tag type="danger" v-else>未付款</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="是否发货" prop="is_send"></el-table-column>
-        <el-table-column label="下单时间">
-          <template slot-scope="scope">{{scope.row.create_time | dataFormat}}</template>
+        <el-table-column label="手机号" prop="usermessage">
+          <template slot-scope="scope">
+            {{scope.iphone}}
+          </template>
+        </el-table-column>
+        <el-table-column label="地址" >
+        </el-table-column>
+        <el-table-column label="是否发货">
+          <template slot-scope="scope">
+            <el-switch v-model="scope.row.isShip" @change="userStateChanged(scope.row)"></el-switch>
+          </template>
+        </el-table-column>
+        <el-table-column label="下单时间" prop="data">
         </el-table-column>
         <el-table-column label="操作" width="180px">
           <template slot-scope="scope">
@@ -97,6 +106,7 @@
 </template>
 
 <script>
+import jwtdecode from 'jwt-decode'
 import cityData from './citydata'
 export default {
   data() {
@@ -126,7 +136,8 @@ export default {
       },
       cityData: cityData,
       // 物流信息数据
-      progressInfo: []
+      progressInfo: [],
+      data: '2022.05.04'
     }
   },
   created() {
@@ -134,16 +145,28 @@ export default {
   },
   computed: {},
   methods: {
+    // 是否发货
+    userStateChanged(item) {
+      console.log(item)
+      this.$http.post('api/order/edit', { _id: item._id, isShip: item.isShip }).then(res => {
+        if (!res) {
+          return this.$message.error('改变发货状态失败！')
+        }
+        this.$message.success('改变发货状态成功！')
+        console.log(res)
+      })
+    },
     // 获取订单数据列表
     async getOrderList() {
-      const { data: res } = await this.$http.get('orders', {
-        params: this.queryInfo
-      })
-      if (res.meta.status !== 200) {
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      const { data: res } = await this.$http.post('api/order/backgetallmes', { userid: userid })
+      if (!res) {
         return this.$message.error('获取订单列表失败！')
       }
-      this.orderList = res.data.goods
-      this.total = res.data.total
+      console.log(res)
+      this.orderList = res
+      this.total = this.orderList.length
     },
     // 监听pageSize改变的事件
     handleSizeChange(newSize) {

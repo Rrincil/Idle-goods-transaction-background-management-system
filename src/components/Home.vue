@@ -2,9 +2,9 @@
   <el-container class="home-container">
     <!-- 头部区域 -->
     <el-header>
-      <div>
-        <img src="../assets/heima.png" alt />
-        <span>电商后台管理系统</span>
+      <div class="imgurl">
+        <img src="../assets/logo.png"/>
+        <span>物质后台管理系统</span>
       </div>
       <el-button type="info" @click="exit">退出</el-button>
     </el-header>
@@ -15,9 +15,9 @@
         <div class="toggle-button" @click="toggleCollapse">|||</div>
         <!-- 侧边栏菜单区域 -->
         <el-menu
-          background-color="#333744"
+          background-color="#915731"
           text-color="#fff"
-          active-text-color="#409eff"
+          active-text-color="#c0e45e"
           unique-opened
           :collapse="isCollapse"
           :collapse-transition="false"
@@ -108,10 +108,14 @@ export default {
 
 <style lang="less" scoped>
 .home-container {
+  width: 100%;
   height: 100%;
 }
+.imgurl{
+  margin-left: 20px;
+}
 .el-header {
-  background-color: #373d41;
+ background: linear-gradient(to left, #495c37, rgb(131, 69, 54)) !important;
   display: flex;
   justify-content: space-between;
   padding-left: 0;
@@ -127,24 +131,37 @@ export default {
   }
 }
 .el-aside {
-  background-color: #333744;
+ background: linear-gradient(to left, #495c37, rgb(131, 69, 54)) !important;
+  // background: linear-gradient(to bottom, #495c37, rgb(131, 69, 54)) !important;
   .el-menu {
     border-right: none;
+  background-color: #c1eeb3;
   }
 }
 .el-main {
+  // width: 80%;
   background-color: #eaedf1;
 }
 .iconfont {
   margin-right: 10px;
 }
 .toggle-button {
-  background-color: #4a5064;
+  background-color: #915731;
   font-size: 10px;
   line-height: 24px;
   color: #fff;
   text-align: center;
   letter-spacing: 0.2em;
   cursor: pointer;
+}
+:deep(div.el-submenu__title){
+  background-color: #319136
+}
+.el-submenu{
+  background-color: #c1eeb3
+}
+
+.element.style{
+ background: linear-gradient(to left, #495c37, rgb(131, 69, 54)) !important
 }
 </style>

@@ -52,7 +52,6 @@
             <el-form-item prop="goods_cat" label="商品分类">
               <!-- 选择商品分类的级联选择框 -->
               <el-cascader
-                expandTrigger="hover"
                 :options="cateList"
                 v-model="addForm.goods_cat"
                 :props="cateProps"
@@ -76,12 +75,16 @@
           </el-tab-pane>
           <el-tab-pane label="商品图片" name="3">
             <!-- action表示图片上传后台api地址 -->
+
             <el-upload
               class="upload-demo"
               :action="uploadURL"
               :on-preview="handlePreview"
               :on-remove="handleRemove"
+              :on-progress="onprogress"
               :file-list="fileList"
+              :auto-upload='false'
+              :before-upload="onprogress"
               :on-change='handleChange'
               accept=".png,.jpg,.jpeg"
               :on-success="handlerSuccess"
@@ -162,13 +165,15 @@ export default {
       cateProps: {
         value: 'cat_id',
         label: 'cat_name',
-        children: 'children'
+        children: 'children',
+        checkStrictly: true
       },
       // 动态参数和静态属性列表数据
       manyTabelData: [],
       onlyTabelData: [],
       // 上传图片的url
-      uploadURL: 'https://img.kuibu.net/upload/backblaze',
+      // uploadURL: 'https://img.kuibu.net/upload/backblaze',
+      uploadURL: 'http://p0.so.qhimgs1.com',
       // 图片上传组件的headers请求头对象
       // headersObj: {
       //   Authorization: window.sessionStorage.getItem('token')
@@ -262,36 +267,65 @@ export default {
     },
     // 处理图片预览的操作
     handlePreview(file) {
+      console.log(file)
       console.log(file.path)
       console.log(file.mimetype)
       this.previewPath = file.response.data.url
       this.previewVisable = true
-      this.fileList.join({ name: '11', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg' })
+      // this.fileList.join({ name: '11', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg' })
     },
     // 处理图片移除的操作
     handleRemove(file) {
       // 1.获取将要删除的图片的临时路径
       // console.log(file)
-      console.log(file.response.url)
-      const filePath = file.response.url
+      console.log(file.response)
+      // const filePath = file.response.url
       // 2.从imgurl数组中，找到这个图片对应的索引值
-      const idx = this.addForm.imgurl.findIndex(x => x.pic === filePath)
-      // 3.调用数组的 splice 方法，把图片信息对象，从imgurl数组中移除
-      this.addForm.imgurl.splice(idx, 1)
+      // const idx = this.addForm.imgurl.findIndex(x => x.pic === filePath)
+      // // 3.调用数组的 splice 方法，把图片信息对象，从imgurl数组中移除
+      // this.addForm.imgurl.splice(idx, 1)
     },
     /**
       * 文件上传change
       */
     handleChange(file, fileList) {
+      // 获取地址
+      const name3 = document.getElementsByClassName('el-upload__input')[0].files[0]
+      // const name1 = document.getElementsByClassName('el-upload__input')[0].value
+      // const name2 = document.getElementsByClassName('el-upload__input')[0].accept.split(',.')[1]
+      // console.log(name1)
+      // file.path = name1
+      // file.mimetype = name2
+      // console.log(name3)
+      const formData = new FormData()
+      formData.append('test', name3)
       // console.log(file)
+      // const config = {
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data'
+      //   }
+      // }
+      this.$http.post('api/upload/img', formData).then(res => {
+        if (!res) {
+          return this.$message.error('获上传失败失败！')
+        }
+        // console.log(res.data)
+        this.fileList.push({ url: res.data })
+        this.addForm.imgurl.push({ pic: res.data })
+      })
+    },
+    onprogress(file, fileList) {
+
     },
     // 监听图片上传成功的事件
     handlerSuccess(response, file) {
       // console.log(file.response.url)
-      // 1.拼接得到一个图片信息对象
-      const picInfo = { pic: file.response.url }
-      // 2.将图片信息对象push到imgurl数组中
-      this.addForm.imgurl.push(picInfo)
+      // console.log(response)
+      // console.log(file)
+      // // 1.拼接得到一个图片信息对象
+      // const picInfo = { pic: file.response.url }
+      // // 2.将图片信息对象push到imgurl数组中
+      // this.addForm.imgurl.push(picInfo)
     },
     // 监听添加商品
     add() {
@@ -320,7 +354,7 @@ export default {
           this.addForm.attrs.push(newInfo)
         })
         form.attrs = this.addForm.attrs
-        console.log(form)
+        // console.log(form)
         if (!form.imgurl.length) {
           const picInfo2 = { pic: 'https://b2.kuibu.net/file/imgdisk/imgs/2022/05/548567f17dd0a59b.png' }
           form.imgurl.push(picInfo2)

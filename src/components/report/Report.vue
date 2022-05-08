@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{dada}}
     <!-- 面包屑导航区域 -->
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
@@ -17,6 +16,8 @@
 
 <script>
 // 1.导入echarts
+// simport  form '../../'
+import jwtdecode from 'jwt-decode'
 import echarts from 'echarts'
 import _ from 'lodash'
 export default {
@@ -25,7 +26,7 @@ export default {
       /* 需要合并的数据 */
       options: {
         title: {
-          text: '用户来源'
+          text: '销售数据'
         },
         tooltip: {
           trigger: 'axis',
@@ -47,7 +48,6 @@ export default {
             boundaryGap: false
           }
         ],
-        dada: null,
         yAxis: [
           {
             type: 'value'
@@ -59,15 +59,18 @@ export default {
   created() {},
   async mounted() {
     // 3.基于准备好的dom，初始化echarts实例
+    const decoded = jwtdecode(window.sessionStorage.token)
+    const userid = decoded.id
     var myChart = echarts.init(document.getElementById('main'))
-    const { data: res } = await this.$http.get('reports/type/1')
+    const { data: res } = await this.$http.post('api/report/getallmes', { userid: userid })
     console.log(res)
-    if (res.meta.status !== 200) {
+    if (!res) {
       return this.$message.error('获取折线图数据失败！')
     }
-    this.dada = res.data
+    console.log(res[0])
     // 4.准备数据和配置项(res.data)
-    const result = _.merge(res.data, this.options)
+    const result = _.merge(res[0], this.options)
+    console.log(result)
     // 5.使用刚指定的配置项和数据显示图表。
     myChart.setOption(result)
   },

@@ -40,7 +40,8 @@ const routes = [
     path: '/home',
     component: Home,
     redirect: '/welcome',
-    children: [{ path: '/welcome', component: Welcome }, { path: '/users', component: Users }, { path: '/rights', component: Rights }, { path: '/roles', component: Roles }, { path: '/categories', component: Cate }, { path: '/params', component: Params }, { path: '/goods', component: GoodsList }, { path: '/goods/add', component: Add }, { path: '/orders', component: Order }, { path: '/reports', component: Report }]
+    children: [
+      { path: '/welcome', component: Welcome }, { path: '/users', component: Users }, { path: '/rights', component: Rights }, { path: '/roles', component: Roles }, { path: '/categories', component: Cate }, { path: '/params', component: Params }, { path: '/goods', component: GoodsList }, { path: '/goods/add', component: Add }, { path: '/orders', component: Order }, { path: '/reports', component: Report }]
   }
 ]
 
@@ -58,6 +59,14 @@ router.beforeEach((to, from, next) => {
   // 获取token
   const tokenStr = window.sessionStorage.getItem('token')
   if (!tokenStr) return next('/login')
+  if (to.path === '/goods/goods') return next('/goods')
+  if (to.path === '/goods/params') return next('/params')
+  if (to.path === '/goods/categories') return next('/categories')
+  if (to.path === '/goods/roles') return next('/roles')
+  if (to.path === '/goods/rights') return next('/rights')
+  if (to.path === '/goods/orders') return next('/orders')
+  if (to.path === '/goods/reports') return next('/reports')
+
   next()
 })
 

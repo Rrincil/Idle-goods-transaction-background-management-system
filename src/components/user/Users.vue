@@ -101,14 +101,14 @@
       <el-form ref="editFormRef" :model="editForm" :rules="editFormRules" label-width="70px">
         <!-- 用户名 -->
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="editForm.username" disabled></el-input>
+          <el-input v-model="editForm.username"></el-input>
         </el-form-item>
         <!-- 邮箱 -->
         <el-form-item prop="email" label="邮箱">
           <el-input v-model="editForm.email"></el-input>
         </el-form-item>
         <!-- 手机 -->
-        <el-form-item prop="mobile" label="手机">
+        <el-form-item prop="mobile" label="手机" disabled>
           <el-input v-model="editForm.mobile"></el-input>
         </el-form-item>
       </el-form>

@@ -27,8 +27,8 @@
         </template>
         <!-- 操作 -->
         <template slot="opt" slot-scope="scope">
-          <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
-          <el-button type="danger" icon="el-icon-delete" size="mini" @click="removecate(scope.row._id)">删除</el-button>
+          <!-- <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button> -->
+          <el-button type="danger" icon="el-icon-delete" size="mini" @click="removecate(scope.row)">删除</el-button>
         </template>
       </tree-table>
       <!-- 分页区域 -->
@@ -59,7 +59,14 @@
         <el-form-item  label="父级分类：">
           <!-- options用来指定数据源 -->
           <!-- props用来指定配置对象 -->
-          <el-cascader expandTrigger="hover" :options="parentCateList" v-model="selectedKeys" :props="cascaderProps" @change="parentCateChange" clearable checkStrictly></el-cascader>
+            <el-cascader
+              :options="cateList"
+              v-model="selectedKeys"
+              :props="cascaderProps"
+              clearable
+              >
+            </el-cascader>
+          <!-- <el-cascader  :options="parentCateList" v-model="selectedKeys" :props="cascaderProps" @change="parentCateChange" clearable checkStrictly></el-cascader> -->
         </el-form-item>
       </el-form>
       <!-- 底部区域 -->
@@ -86,6 +93,7 @@ export default {
       cateList: [],
       // 总数据条数
       total: 0,
+      catid: '',
       // 为table指定列的定义
       columns: [{
         label: '分类名称',
@@ -128,7 +136,7 @@ export default {
       cascaderProps: {
         value: 'cat_id',
         label: 'cat_name',
-        children: 'children'
+        checkStrictly: true
       },
       // 选中的父级分类的id数组
       selectedKeys: []
@@ -149,6 +157,7 @@ export default {
       // console.log(res)
       this.cateList = res
       this.total = this.cateList.length
+      // console.log(this.cateList)
     },
     // 监听pageSize改变的事件
     handleSizeChange(newSize) {
@@ -192,25 +201,20 @@ export default {
     // 添加分类按钮
     addCate(addCateForm) {
       this.$refs.addCateFormRef.validate(async valid => {
-        console.log(addCateForm.cat_name)
         console.log(this.selectedKeys)
-        const catid = this.selectedKeys[0]
-        // 2.从imgurl数组中，找到这个图片对应的索引值
-        const idx = this.cateList.findIndex(x => x.cat_id === catid)
-        // 3.调用数组的 splice 方法，把图片信息对象，从imgurl数组中移除
-        console.log(this.cateList[idx])
         const decoded = jwtdecode(window.sessionStorage.token)
         const userid = decoded.id
-        const catid2 = 2200 + this.cateList.length
-        if (!valid) return
-        const { data: res } = await this.$http.post('api/categorie/add', { cat_name: addCateForm.cat_name, cateparams: addCateForm.cateparams, userid: userid, cateList: this.addCateForm, cat_id: catid2 })
-        if (!res) {
-          return this.$message.error('添加分类数据失败！')
-        }
-        console.log(res)
-        this.$message.success('添加分类数据成功！')
-        this.getCateList()
-        this.addCateDialogVisible = false
+        console.log(this.selectedKeys[1])
+        console.log(this.addCateForm.cateparams)
+        this.$http.post('api/categorie/add', { cat_id: this.selectedKeys, cat_id2: this.cateList.length++, cateparams: this.addCateForm.cateparams, userid: userid, cateList: this.addCateForm, cat_name: this.addCateForm.cat_name, catid11: this.cateList.length }).then(res => {
+          if (!res) {
+            return this.$message.error('添加分类数据失败！')
+          }
+          console.log(res)
+          this.$message.success(res.data.mes)
+          this.getCateList()
+          this.addCateDialogVisible = false
+        })
       })
     },
     // 监听对话框的关闭事件
@@ -220,7 +224,8 @@ export default {
       this.addCateForm.cat_pid = 0
       this.addCateForm.cat_level = 0
     },
-    async removecate(id) {
+    async removecate(item) {
+      console.log(item)
       // 弹窗询问用户是否删除
       const result = await this.$confirm('此操作将永久删除该商品, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -232,18 +237,16 @@ export default {
       if (result !== 'confirm') {
         return this.$message.info('已取消了删除！')
       }
-      console.log(id)
-      const _id = id
       const decoded = jwtdecode(window.sessionStorage.token)
       const userid = decoded.id
-      console.log(userid)
-      const { data: res } = await this.$http.post('api/allproduct/delete', { _id: _id, userid: userid })
+      // console.log(userid)
+      const { data: res } = await this.$http.post('api/categorie/delete', { cat_id: item.cat_id, userid: userid, cat_level: item.cat_level, cat_pid: item.cat_pid, cat_pid2: item.cat_pid2 })
       // console.log(res)
       if (!res) {
-        return this.$message.error('删除商品失败！')
+        return this.$message.error('删除分类失败！')
       }
       console.log(res)
-      this.$message.success('该商品成功删除！')
+      this.$message.success('该分类成功删除！')
       this.getCateList()
     }
   }
