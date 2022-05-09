@@ -27,12 +27,9 @@
             <el-tag type="danger" v-else>未付款</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="手机号" prop="usermessage">
-          <template slot-scope="scope">
-            {{scope.iphone}}
-          </template>
+        <el-table-column label="手机号" prop="usermessage[0].iphone">
         </el-table-column>
-        <el-table-column label="地址" >
+        <el-table-column label="地址" prop="usermessage[0].address">
         </el-table-column>
         <el-table-column label="是否发货">
           <template slot-scope="scope">
@@ -52,7 +49,7 @@
             ></el-button>
             <!-- 物流进度按钮 -->
             <el-button
-              @click="showProgressBox(scope.row.id)"
+              @click="showProgressBox(scope.row)"
               type="success"
               icon="el-icon-location"
               size="mini"
@@ -92,14 +89,10 @@
       </span>
     </el-dialog>
     <!-- 展示物流进度的对话框 -->
-    <el-dialog title="物流进度" :visible.sync="progressVisible" width="45%" @close="addressDialogClosed">
+    <el-dialog title="物资信息" :visible.sync="progressVisible" width="45%" @close="addressDialogClosed">
       <el-timeline>
-        <el-timeline-item
-          v-for="(activity, index) in progressInfo"
-          :key="index"
-          :timestamp="activity.time">
-          {{activity.context}}
-        </el-timeline-item>
+        <p>{{progressInfo.name}}</p>
+        <p>{{progressInfo.num}}</p>
       </el-timeline>
     </el-dialog>
   </div>
@@ -183,17 +176,14 @@ export default {
       this.addressVisible = true
     },
     // 展示物流进度的对话框
-    async showProgressBox() {
-      const { data: res } = await this.$http.get('/kuaidi/804909574412544580')
-      if (res.meta.status !== 200) {
-        return this.$message.error('获取物流信息失败！')
-      }
-      this.progressInfo = res.data
+    async showProgressBox(item) {
+      this.progressInfo = item
       this.progressVisible = true
+      // console.log(item)
     },
     // 监听对话框的关闭事件
     addressDialogClosed() {
-      this.$refs.addressFormRef.resetFields()
+      this.progressVisible = false
     }
   }
 }
