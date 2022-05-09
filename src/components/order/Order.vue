@@ -92,7 +92,7 @@
     <el-dialog title="物资信息" :visible.sync="progressVisible" width="45%" @close="addressDialogClosed">
       <el-timeline>
         <p>{{progressInfo.name}}</p>
-        <p>{{progressInfo.num}}</p>
+        <p>{{progressInfo.num}}{{progressInfo.cateparams}}</p>
       </el-timeline>
     </el-dialog>
   </div>
@@ -163,13 +163,28 @@ export default {
     },
     // 监听pageSize改变的事件
     handleSizeChange(newSize) {
+      // 获取改变的页码
+      const newPage = this.queryInfo.pagenum
+      const firstpagesnum = (newPage - 1) * newSize
+      const lastpagesnum = newPage * newSize
+      this.goodsList2 = this.goodsList.slice(firstpagesnum, lastpagesnum)
+      // 每页显示的数据改变
       this.queryInfo.pagesize = newSize
-      this.getOrderList()
+      console.log(newSize)
     },
     // 监听页码值改变的事件
     handleCurrentChange(newPage) {
+      // console.log(newPage)
+      const newSize = this.queryInfo.pagesize
+      // console.log(newPage)
+      const firstpagesnum = (newPage - 1) * newSize
+      // console.log(firstpagesnum)
+      const lastpagesnum = newPage * newSize
+      // console.log(lastpagesnum)
+      this.goodsList2 = this.goodsList.slice(firstpagesnum, lastpagesnum)
+      // 页码改变
       this.queryInfo.pagenum = newPage
-      this.getOrderList()
+      // this.getGoodsList()
     },
     // 展示修改按钮的对话框
     showEditDialog() {

@@ -38,7 +38,7 @@
         >
           <el-tab-pane label="基本信息" name="0">
             <el-form-item prop="shopname" label="商家名称">
-              <el-input v-model="addForm.shopname" placeholder="帽子之家"></el-input>
+              <el-input v-model="addForm.shopname" placeholder="零售商家"></el-input>
             </el-form-item>
             <el-form-item prop="name" label="商品名称">
               <el-input v-model="addForm.name"></el-input>
@@ -59,15 +59,9 @@
                 clearable
                 checkStrictly
               ></el-cascader>
-              <el-button
-                size="mini"
-                type="primary"
-                :disabled="isBtnDisabled"
-                @click="getParamsData"
-              >查询</el-button>
             </el-form-item>
-            <el-form-item prop="params" label="商品参数规格">
-              <el-input v-model="addForm.params" type="params"></el-input>
+            <el-form-item  label="商品参数规格">
+              <input v-model="addForm.params" disabled class="params" style="color:red"/>
             </el-form-item>
           </el-tab-pane>
           <!-- <el-tab-pane label="商品参数" name="1">
@@ -140,7 +134,7 @@ export default {
         name: '',
         price: null,
         params: '',
-        shopname: '帽子',
+        shopname: '',
         number: 0,
         // 商品所属的分类数组
         goods_cat: [],
@@ -201,7 +195,7 @@ export default {
     // 解析token获取id
     const decoded = jwtdecode(window.sessionStorage.token)
     this.addForm.userid = decoded.id
-    // console.log(decoded.shopname)
+    this.addForm.shopname = decoded.shopname
     this.getCatList()
   },
   computed: {
@@ -226,9 +220,43 @@ export default {
     },
     // 监听级联选择器变化
     parentCateChange() {
-      // if (this.addForm.goods_cat.length !== 3) {
-      //   this.addForm.goods_cat = []
-      // }
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      if (this.addForm.goods_cat.length === 1) {
+        const filePath = this.addForm.goods_cat[0]
+        const idx = this.cateList.findIndex(x => x.cat_id === filePath)
+        const item = this.cateList[idx]
+        this.$http.post('api/categorie/findparams', { cat_id: item.cat_id, userid: userid, cat_level: item.cat_level, cat_pid: item.cat_pid, cat_pid2: item.cat_pid2 }).then(res => {
+          if (!res) {
+            return this.$message.error('获取数据失败！')
+          }
+          this.addForm.params = res.data.params
+        })
+      } else if (this.addForm.goods_cat.length === 2) {
+        const filePath = this.addForm.goods_cat[0]
+        const idx = this.cateList.findIndex(x => x.cat_id === filePath)
+        const idx2 = this.cateList[idx].children.findIndex(x => x.cat_id === this.addForm.goods_cat[1])
+        const item = this.cateList[idx].children[idx2]
+        this.$http.post('api/categorie/findparams', { cat_id: item.cat_id, userid: userid, cat_level: item.cat_level, cat_pid: item.cat_pid, cat_pid2: item.cat_pid2 }).then(res => {
+          if (!res) {
+            return this.$message.error('获取数据失败！')
+          }
+          this.addForm.params = res.data.params
+        })
+      } else if (this.addForm.goods_cat.length === 3) {
+        const filePath = this.addForm.goods_cat[0]
+        const idx = this.cateList.findIndex(x => x.cat_id === filePath)
+        const idx2 = this.cateList[idx].children.findIndex(x => x.cat_id === this.addForm.goods_cat[1])
+        const idx3 = this.cateList[idx].children[idx2].children.findIndex(x => x.cat_id === this.addForm.goods_cat[2])
+        const item = this.cateList[idx].children[idx2].children[idx3]
+        this.$http.post('api/categorie/findparams', { cat_id: item.cat_id, userid: userid, cat_level: item.cat_level, cat_pid: item.cat_pid, cat_pid2: item.cat_pid2 }).then(res => {
+          if (!res) {
+            return this.$message.error('获取数据失败！')
+          }
+          this.addForm.params = res.data.params
+        })
+      }
+      // console.log(this.addForm.goods_cat)
     },
     beforeTabLeave(activeName, oldActiveName) {
       if (this.addForm.goods_cat.length === 0) {
@@ -397,5 +425,10 @@ export default {
 }
 .btnAdd {
   margin-top: 15px;
+}
+.params{
+  color: red !important;
+  font-size: 50px;
+  height: 70px;
 }
 </style>
