@@ -15,11 +15,11 @@
       <!-- 步骤条区域 -->
       <el-steps :space="200" :active="activeIndex - 0" finish-status="success" align-center>
         <el-step title="基本信息"></el-step>
-        <el-step title="商品参数"></el-step>
-        <el-step title="商品属性"></el-step>
+        <!-- <el-step title="商品参数"></el-step> -->
+        <!-- <el-step title="商品属性"></el-step> -->
         <el-step title="商品图片"></el-step>
         <el-step title="商品内容"></el-step>
-        <el-step title="完成"></el-step>
+        <!-- <el-step title="完成"></el-step> -->
       </el-steps>
       <!-- form表单 -->
       <el-form
@@ -59,20 +59,29 @@
                 clearable
                 checkStrictly
               ></el-cascader>
+              <el-button
+                size="mini"
+                type="primary"
+                :disabled="isBtnDisabled"
+                @click="getParamsData"
+              >查询</el-button>
+            </el-form-item>
+            <el-form-item prop="params" label="商品参数规格">
+              <el-input v-model="addForm.params" type="params"></el-input>
             </el-form-item>
           </el-tab-pane>
-          <el-tab-pane label="商品参数" name="1">
+          <!-- <el-tab-pane label="商品参数" name="1">
             <el-form-item :label="item.attr_name" v-for="item in manyTabelData" :key="item.attr_id">
               <el-checkbox-group v-model="item.attr_vals">
                 <el-checkbox :label="cb" v-for="(cb,i) in item.attr_vals" :key="i" border></el-checkbox>
               </el-checkbox-group>
             </el-form-item>
-          </el-tab-pane>
-          <el-tab-pane label="商品属性" name="2">
+          </el-tab-pane> -->
+          <!-- <el-tab-pane label="商品属性" name="2">
             <el-form-item :label="item.attr_name" v-for="item in onlyTabelData" :key="item.attr_id">
               <el-input v-model="item.attr_vals"></el-input>
             </el-form-item>
-          </el-tab-pane>
+          </el-tab-pane> -->
           <el-tab-pane label="商品图片" name="3">
             <!-- action表示图片上传后台api地址 -->
 
@@ -130,6 +139,7 @@ export default {
         userid: '',
         name: '',
         price: null,
+        params: '',
         shopname: '帽子',
         number: 0,
         // 商品所属的分类数组
@@ -157,6 +167,9 @@ export default {
         ],
         goods_cat: [
           { required: true, message: '请选择商品分类', trigger: 'blur' }
+        ],
+        params: [
+          { required: true, message: '商品参数', trigger: 'blur' }
         ]
       },
       // 商品分类列表

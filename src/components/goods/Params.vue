@@ -15,7 +15,21 @@
         <el-col>
           <span>选择商品分类：</span>
           <!-- 选择商品分类的级联选择框 -->
-          <el-select v-model="catvalue" placeholder="请选择">
+          <el-cascader
+            :options="cateList"
+            placeholder="请选择"
+            v-model="catvalue"
+            :props="cascaderProps"
+            clearable
+            >
+          </el-cascader>
+          <el-button
+            size="mini"
+            type="primary"
+            :disabled="isBtnDisabled"
+            @click="getParamsData"
+          >查询</el-button>
+          <!-- <el-select v-model="catvalue" placeholder="请选择">
             <el-option
               v-for="item in cateList"
               :key="item"
@@ -23,8 +37,8 @@
               :value="item.cat_name"
               @change="parentCateChange"
               >
-            </el-option>
-          </el-select>
+            </el-option> -->
+          <!-- </el-select> -->
           <!-- <el-cascader
             expandTrigger="hover"
             :options="cateList"
@@ -44,113 +58,19 @@
             size="mini"
             type="primary"
             :disabled="isBtnDisabled"
-            @click="addDialogVisible=true"
-          >添加参数</el-button>
+            @click="addDialogVisibleTO()"
+          >修改参数</el-button>
           <!-- 动态参数表格 -->
-          <el-table :data="manyTabelData" border stripe>
-            <!-- 展开行 -->
-            <el-table-column type="expand">
-              <template slot-scope="scope">
-                <!-- 循环渲染tag标签 -->
-                <el-tag v-for="(item,i) in scope.row.attr_vals" :key="i" closable @close="handleClose(i,scope.row)">{{item}}</el-tag>
-                <!-- 输入的文本框 -->
-                <el-input
-                  class="input-new-tag"
-                  v-if="scope.row.inputVisible"
-                  v-model="scope.row.inputValue"
-                  ref="saveTagInput"
-                  size="small"
-                  @keyup.enter.native="handleInputConfirm(scope.row)"
-                  @blur="handleInputConfirm(scope.row)"
-                ></el-input>
-                <!-- 添加按鈕 -->
-                <el-button
-                  v-else
-                  class="button-new-tag"
-                  size="small"
-                  @click="showInput(scope.row)"
-                >+ New Tag</el-button>
-              </template>
-            </el-table-column>
-            <el-table-column type="index"></el-table-column>
-            <el-table-column label="参数名称" prop="attr_name"></el-table-column>
-            <el-table-column label="操作">
-              <template slot-scope="scope">
-                <el-button
-                  type="primary"
-                  icon="el-icon-edit"
-                  size="mini"
-                  @click="showEditDialog(scope.row.attr_id)"
-                >编辑</el-button>
-                <el-button
-                  type="danger"
-                  icon="el-icon-delete"
-                  size="mini"
-                  @click="removeParams(scope.row.attr_id)"
-                >删除</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
+          <!-- <el-table  border stripe> -->
+            <p v-show="isparams" class="params">{{paramsname}}{{params}}</p>
+          <!-- </el-table> -->
         </el-tab-pane>
         <!-- 添加静态属性的面板 -->
-        <el-tab-pane label="静态属性" name="only">
-          <el-button
-            size="mini"
-            type="primary"
-            :disabled="isBtnDisabled"
-            @click="addDialogVisible=true"
-          >添加属性</el-button>
-          <!-- 静态属性表格 -->
-          <el-table :data="onlyTabelData" border stripe>
-            <!-- 展开行 -->
-            <el-table-column type="expand">
-              <template slot-scope="scope">
-                <!-- 循环渲染tag标签 -->
-                <el-tag v-for="(item,i) in scope.row.attr_vals" :key="i" closable @close="handleClose(i,scope.row)">{{item}}</el-tag>
-                <!-- 输入的文本框 -->
-                <el-input
-                  class="input-new-tag"
-                  v-if="scope.row.inputVisible"
-                  v-model="scope.row.inputValue"
-                  ref="saveTagInput"
-                  size="small"
-                  @keyup.enter.native="handleInputConfirm(scope.row)"
-                  @blur="handleInputConfirm(scope.row)"
-                ></el-input>
-                <!-- 添加按鈕 -->
-                <el-button
-                  v-else
-                  class="button-new-tag"
-                  size="small"
-                  @click="showInput(scope.row)"
-                >+ New Tag</el-button>
-              </template>
-            </el-table-column>
-            <el-table-column type="index"></el-table-column>
-            <el-table-column label="属性名称" prop="attr_name"></el-table-column>
-            <el-table-column label="操作">
-              <template slot-scope="scope">
-                <el-button
-                  type="primary"
-                  icon="el-icon-edit"
-                  size="mini"
-                  @click="showEditDialog(scope.row.attr_id)"
-                >编辑</el-button>
-                <el-button
-                  type="danger"
-                  icon="el-icon-delete"
-                  size="mini"
-                  @click="removeParams(scope.row.attr_id)"
-                >删除</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-tab-pane>
       </el-tabs>
     </el-card>
     <!-- 添加参数的对话框 -->
     <el-dialog
-      :title="'添加'+ titleText"
+      :title="'修改'+ titleText + '动态参数'"
       :visible.sync="addDialogVisible"
       width="45%"
       @close="addDialogClosed"
@@ -200,12 +120,22 @@ export default {
     return {
       // 商品分类列表
       cateList: [],
+      params: '',
+      attrname: '',
+      isparams: false,
       catvalue: null,
+      paramsitem: '',
+      paramsname: '',
       // 级联选择框的配置对象
       cateProps: {
         value: 'cat_id',
         label: 'cat_name',
         children: 'children'
+      },
+      cascaderProps: {
+        value: 'cat_id',
+        label: 'cat_name',
+        checkStrictly: true
       },
       // 选中的父级分类的id数组
       // value: [],
@@ -255,10 +185,7 @@ export default {
     },
     // 动态计算对话框标题的文本
     titleText() {
-      if (this.activeName === 'many') {
-        return '动态参数'
-      }
-      return '静态属性'
+      return this.paramsitem.cat_name
     }
   },
   methods: {
@@ -266,13 +193,13 @@ export default {
     async getCatList() {
       const decoded = jwtdecode(window.sessionStorage.token)
       const userid = decoded.id
-      console.log(userid)
+      // console.log(userid)
       const { data: res } = await this.$http.post('api/categorie/getallmes', { userid: userid })
       if (!res) {
         return this.$message.error('获取商品分类失败！')
       }
       this.cateList = res
-      console.log(this.cateList)
+      // console.log(this.cateList)
     },
     // 监听选择项变化事件
     parentCateChange() {
@@ -285,31 +212,74 @@ export default {
     },
     // 获取参数的列表数据
     async getParamsData() {
-      // 选中的是3级分类，则根据所选id和name获取对应的参数
-      console.log(this.catvalue)
-      const { data: res } = await this.$http.get(
-        'api/categorie/getparams',
-        {
-          cat_name: this.catvalue
-        }
-      )
-      if (!res) {
-        return this.$message.error('获取参数列表失败！')
+      // console.log(this.catvalue)
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      if (this.catvalue.length === 1) {
+        const filePath = this.catvalue[0]
+        const idx = this.cateList.findIndex(x => x.cat_id === filePath)
+        const item = this.cateList[idx]
+        this.paramsitem = item
+        this.$http.post('api/categorie/findparams', { cat_id: item.cat_id, userid: userid, cat_level: item.cat_level, cat_pid: item.cat_pid, cat_pid2: item.cat_pid2 }).then(res => {
+          if (!res) {
+            return this.$message.error('获取数据失败！')
+          }
+          this.$message.success(res.data.params)
+          this.paramsname = item.cat_name
+          this.params = res.data.params
+          this.isparams = true
+          this.addCateDialogVisible = false
+          this.manyTabelData = res.data.params
+        })
+      } else if (this.catvalue.length === 2) {
+        const filePath = this.catvalue[0]
+        const idx = this.cateList.findIndex(x => x.cat_id === filePath)
+        const idx2 = this.cateList[idx].children.findIndex(x => x.cat_id === this.catvalue[1])
+        const item = this.cateList[idx].children[idx2]
+        this.paramsitem = item
+        this.$http.post('api/categorie/findparams', { cat_id: item.cat_id, userid: userid, cat_level: item.cat_level, cat_pid: item.cat_pid, cat_pid2: item.cat_pid2 }).then(res => {
+          if (!res) {
+            return this.$message.error('获取数据失败！')
+          }
+          this.$message.success(res.data.params)
+          this.paramsname = item.cat_name
+          this.params = res.data.params
+          this.isparams = true
+          this.addCateDialogVisible = false
+          this.manyTabelData = res.data.params
+        })
+      } else if (this.catvalue.length === 3) {
+        const filePath = this.catvalue[0]
+        const idx = this.cateList.findIndex(x => x.cat_id === filePath)
+        const idx2 = this.cateList[idx].children.findIndex(x => x.cat_id === this.catvalue[1])
+        const idx3 = this.cateList[idx].children[idx2].children.findIndex(x => x.cat_id === this.catvalue[2])
+        const item = this.cateList[idx].children[idx2].children[idx3]
+        this.paramsitem = item
+        this.$http.post('api/categorie/findparams', { cat_id: item.cat_id, userid: userid, cat_level: item.cat_level, cat_pid: item.cat_pid, cat_pid2: item.cat_pid2 }).then(res => {
+          if (!res) {
+            return this.$message.error('获取数据失败！')
+          }
+          this.$message.success(res.data.params)
+          this.paramsname = item.cat_name
+          this.params = res.data.params
+          this.isparams = true
+          this.addCateDialogVisible = false
+          this.manyTabelData = res.data.params
+        })
       }
       // 将attr_vals通过空格进行分割，然后得到数组
-      res.data.forEach(item => {
-        item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
-        // 控制文本框的显示与隐藏
-        item.inputVisible = false
-        item.inputValue = ''
-      })
+      // res.data.forEach(item => {
+      //   item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
+      //   // 控制文本框的显示与隐藏
+      //   item.inputVisible = false
+      //   item.inputValue = ''
+      // })
       // this.$message.success('获取参数列表成功！')
       // if (this.activeName === 'many') {
       //   this.manyTabelData = res.data
       // } else {
       //   this.onlyTabelData = res.data
       // }
-      this.manyTabelData = res
     },
     // 监听添加对话框的关闭事件
     addDialogClosed() {
@@ -320,25 +290,27 @@ export default {
     },
     // 监听确定按钮，添加参数
     addParams() {
-      const decoded = jwtdecode(window.sessionStorage.token)
-      const userid = decoded.id
-      const filePath = this.catvalue
-      // 2.从imgurl数组中，找到这个图片对应的索引值
-      const idx = this.cateList.findIndex(x => x.cat_name === filePath)
-      console.log(this.cateList[idx]._id)
-      const a = { _id: this.cateList[idx]._id, userid: userid, attr_name: this.addForm.attr_name }
-      // attr_sel: this.activeName
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return
-        const { res } = await this.$http.post('api/categorie/addcateparams', a)
-        console.log(res)
-        if (!res) {
-          return this.$message.error('添加参数失败！')
-        }
-        this.$message.success('添加参数成功！')
-        this.getParamsData()
-        this.addDialogVisible = false
+        console.log(111)
+        const decoded = jwtdecode(window.sessionStorage.token)
+        const userid = decoded.id
+        const item = this.paramsitem
+        this.$http.post('api/categorie/edit', { cat_id: item.cat_id, userid: userid, cat_level: item.cat_level, cat_pid: item.cat_pid, cat_pid2: item.cat_pid2, cateparams: this.addForm.attr_name }).then(res => {
+          if (!res) {
+            return this.$message.error('修改参数失败！')
+          }
+          console.log(res)
+          this.$message.success(res.data.mes)
+          this.addDialogVisible = false
+          this.getParamsData()
+        })
       })
+    },
+    addDialogVisibleTO() {
+      // this.addForm.attr_name = this.paramsitem.cateparams
+      // this.attrname = this.paramsitem.cateparams
+      this.addDialogVisible = true
     },
     // 编辑按钮
     editParams() {
@@ -389,12 +361,7 @@ export default {
     // 点击编辑按钮，展示修改的对话框
     async showEditDialog(id) {
       // 查询当前参数的信息
-      const { data: res } = await this.$http.get(
-        `categories/${this.cateId}/attributes/${id}`,
-        {
-          attr_sel: this.activeName
-        }
-      )
+      const { data: res } = await this.$http.post('api/categorie/findparams', {})
       if (res.meta.status !== 200) {
         return this.$message.error('获取参数信息失败！')
       }
@@ -457,5 +424,11 @@ export default {
 }
 .input-new-tag {
   width: 120px;
+}
+.params{
+  text-align: center;
+  color: rgb(189, 67, 67);
+  font-weight: 900;
+  font-size: 50px;
 }
 </style>
