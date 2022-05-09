@@ -9,7 +9,7 @@
     <!-- 卡片视图 -->
     <el-card>
       <!-- 2.为ECharts准备一个具备大小（宽高）的Dom -->
-      <div id="main" style="width: 750px;height:400px;"></div>
+      <div id="main" class="report"></div>
     </el-card>
   </div>
 </template>
@@ -79,5 +79,9 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
+<style  scoped>
+.report{
+  width: 100%;
+  height: 500px;
+}
 </style>
