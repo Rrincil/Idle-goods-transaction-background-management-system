@@ -1,5 +1,39 @@
 <template>
   <div class="rights">
+    <div class="rightstop">
+      <el-row :span="24">
+        <el-col :span="4">
+          <el-button @click="changedata()">
+            当日
+          </el-button>
+        </el-col>
+        <el-col :span="4">
+          <el-button>
+            最近7天
+          </el-button>
+        </el-col>
+        <el-col :span="4">
+          <el-button>
+            最近15天
+          </el-button>
+        </el-col>
+        <el-col :span="4">
+          <el-button>
+            最近30天
+          </el-button>
+        </el-col>
+        <el-col :span="4">
+          <el-button>
+            最近60天
+          </el-button>
+        </el-col>
+        <el-col :span="4">
+          <el-button>
+            最近90天
+          </el-button>
+        </el-col>
+      </el-row>
+    </div>
     <div class="one">
       <el-row :gutter="24">
         <el-col :span="12" class="one1" >
@@ -53,6 +87,7 @@
         </el-col>
       </el-row>
     </div>
+
     <div class="two">
       <div class="twod1" id="zhu3">
 
@@ -263,6 +298,10 @@ export default {
       myChart.setOption(options)
       myChart2.setOption(this.option2)
       myChart3.setOption(this.option3)
+    },
+    changedata() {
+      alert('11')
+      this.option2 = this.option3
     }
   },
   mounted() {
@@ -338,7 +377,7 @@ canvas{
   width: 100%;
   height: 100%;
   margin-bottom: 20px;
-  box-shadow: 0px 5px 5px 0px rgba(255,255,0,0.5);
+
 }
 
 .el-row:last-child {
@@ -350,11 +389,20 @@ canvas{
   border-radius: 4px;
 
 }
+.el-col-4{
+  line-height: 10px;
+  padding-top: 10px;
+  background-color: white;
+  height: 100%;
+}
+.el-col-4 el-button{
+  margin-top: 10px;
+}
 .el-col-12{
   height: 100%;
   background-color: white;
   border-radius: 4px;
-
+  box-shadow: 0px 5px 5px 0px rgba(255,255,0,0.5);
 }
 .el-col-1{
   height: 100%;
@@ -376,7 +424,7 @@ canvas{
   background-color: #eaedf1;
 }
 .top{
-  color: rgb(255, 0, 0);
+  color: rgb(110, 58, 58);
   text-shadow: 10px 5px 5px 10px rgba(138, 34, 34, 0.5);
   font-weight: 900;
   text-align: left;
@@ -408,5 +456,10 @@ canvas{
   padding-top: 30px;
   width: 100%;
   height: 10%;
+}
+.rightstop{
+  width: 100%;
+  height: 60px;
+  /* background-color: blueviolet; */
 }
 </style>
