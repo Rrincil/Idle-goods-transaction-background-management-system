@@ -29,7 +29,7 @@
 <script>
 import jwtdecode from 'jwt-decode'
 export default {
-  name: 'Roles',
+  name: 'userinfo',
   data() {
     const validatePass2 = (rulus, value, callback) => {
       if (value !== this.registUser.password) {
@@ -98,7 +98,7 @@ export default {
     getuserinfo() {
       const decoded = jwtdecode(window.sessionStorage.token)
       this.registUser = decoded
-      console.log(this.registUser)
+      // console.log(this.registUser)
     },
     submitForm(formname) {
     //   this.$refs[formname].validate((valid) => {

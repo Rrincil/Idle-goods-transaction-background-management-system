@@ -11,10 +11,10 @@ const Welcome = () => import(/* webpackChunkName: "login_home_welcome" */ '../co
 
 // import Users from '../components/user/Users.vue'
 // import Rights from '../components/power/Rights.vue'
-// import Roles from '../components/power/Roles.vue'
-const Users = () => import(/* webpackChunkName: "users_rights_roles" */ '../components/user/Users.vue')
-const Rights = () => import(/* webpackChunkName: "users_rights_roles" */ '../components/power/Rights.vue')
-const Roles = () => import(/* webpackChunkName: "users_rights_roles" */ '../components/power/Roles.vue')
+// import userinfo from '../components/power/userinfo.vue'
+const Users = () => import(/* webpackChunkName: "users_rights_userinfo" */ '../components/user/Users.vue')
+const Rights = () => import(/* webpackChunkName: "users_rights_userinfo" */ '../components/power/Rights.vue')
+const userinfo = () => import(/* webpackChunkName: "users_rights_userinfo" */ '../components/power/userinfo.vue')
 
 // import Cate from '../components/goods/Cate.vue'
 // import Params from '../components/goods/Params.vue'
@@ -41,7 +41,7 @@ const routes = [
     component: Home,
     redirect: '/welcome',
     children: [
-      { path: '/welcome', component: Welcome }, { path: '/users', component: Users }, { path: '/rights', component: Rights }, { path: '/roles', component: Roles }, { path: '/categories', component: Cate }, { path: '/params', component: Params }, { path: '/goods', component: GoodsList }, { path: '/goods/add', component: Add }, { path: '/orders', component: Order }, { path: '/reports', component: Report }]
+      { path: '/welcome', component: Welcome }, { path: '/users', component: Users }, { path: '/rights', component: Rights }, { path: '/userinfo', component: userinfo }, { path: '/categories', component: Cate }, { path: '/params', component: Params }, { path: '/goods', component: GoodsList }, { path: '/goods/add', component: Add }, { path: '/orders', component: Order }, { path: '/reports', component: Report }, { path: '/userinfo', component: userinfo }]
   }
 ]
 
@@ -62,7 +62,7 @@ router.beforeEach((to, from, next) => {
   if (to.path === '/goods/goods') return next('/goods')
   if (to.path === '/goods/params') return next('/params')
   if (to.path === '/goods/categories') return next('/categories')
-  if (to.path === '/goods/roles') return next('/roles')
+  if (to.path === '/goods/userinfo') return next('/userinfo')
   if (to.path === '/goods/rights') return next('/rights')
   if (to.path === '/goods/orders') return next('/orders')
   if (to.path === '/goods/reports') return next('/reports')
