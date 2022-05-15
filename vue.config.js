@@ -11,15 +11,15 @@ module.exports = {
     config.when(process.env.NODE_ENV === 'production', config => {
       config.entry('app').clear().add('./src/main-prod.js')
       // 通过 externals 加载外部 CDN 资源
-      config.set('externals', {
-        vue: 'Vue',
-        'vue-router': 'VueRouter',
-        axios: 'axios',
-        lodash: '_',
-        echarts: 'echarts',
-        nprogress: 'NProgress',
-        'vue-quill-editor': 'VueQuillEditor'
-      })
+      // config.set('externals', {
+      //   vue: 'Vue',
+      //   'vue-router': 'VueRouter',
+      //   axios: 'axios',
+      //   lodash: '_',
+      //   echarts: 'echarts',
+      //   nprogress: 'NProgress',
+      //   'vue-quill-editor': 'VueQuillEditor'
+      // })
       // 通过.tap 链式操作修改插件里面相关参数
       config.plugin('html').tap(args => {
         args[0].isProd = false
@@ -39,6 +39,7 @@ module.exports = {
   css: {
     extract: false
   },
+  lintOnSave:false,
   devServer: {
     open: true,
     // host:'http://101.201.220.43',

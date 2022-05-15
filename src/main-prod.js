@@ -30,7 +30,7 @@ import 'nprogress/nprogress.css'
 axios.interceptors.request.use(config => {
   NProgress.start()
   config.headers.Authorization = window.sessionStorage.getItem('token')
-  console.log(config)
+  // console.log(config)
   return config
 })
 // 在 response 拦截器中，隐藏进度条 NProgress.done()
