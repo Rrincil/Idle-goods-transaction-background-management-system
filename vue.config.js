@@ -22,7 +22,7 @@ module.exports = {
       })
       // 通过.tap 链式操作修改插件里面相关参数
       config.plugin('html').tap(args => {
-        args[0].isProd = true
+        args[0].isProd = false
         return args
       })
     })

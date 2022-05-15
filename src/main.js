@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
-import router from './router'
+import router from './router/router'
 import './plugins/element.js'
 // 导入全局样式表
 import './assets/css/global.css'
@@ -23,7 +23,7 @@ import 'nprogress/nprogress.css'
 
 // 配置请求的根路径
 // axios.defaults.baseURL = 'http://localhost:3001/api/'
-
+axios.defaults.baseURL = 'http://101.201.220.43:3001/api'
 // 在 request 拦截器中，显示进度条 NProgress.start()
 // 设置axios请求拦截器
 axios.interceptors.request.use(config => {
@@ -42,7 +42,7 @@ Vue.prototype.$http = axios
 
 Vue.config.productionTip = false
 // 全局注册组件
-Vue.component('tree-table', TreeTable)
+// Vue.component('tree-table', TreeTable)
 // 将富文本编辑器进行全局注册
 Vue.use(VueQuillEditor/* { default global options } */)
 // 自定义格式化时间的全局过滤器

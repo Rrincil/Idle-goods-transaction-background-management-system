@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
-import router from './router'
+import router from './router/router'
 import './plugins/element.js'
 // 导入全局样式表
 import './assets/css/global.css'
@@ -23,13 +23,13 @@ import 'nprogress/nprogress.css'
 
 // 配置请求的根路径
 // axios.defaults.baseURL = 'https://www.liulongbin.top:8888/api/private/v1/'
-
+// axios.defaults.baseURL = 'http://101.201.220.43:3001/'
 // 在 request 拦截器中，显示进度条 NProgress.start()
 // 设置axios请求拦截器
 axios.interceptors.request.use(config => {
   NProgress.start()
   config.headers.Authorization = window.sessionStorage.getItem('token')
-  // console.log(config)
+  console.log(config)
   return config
 })
 // 在 response 拦截器中，隐藏进度条 NProgress.done()
