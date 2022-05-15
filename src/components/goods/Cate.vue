@@ -157,8 +157,9 @@ export default {
       if (!res) {
         return this.$message.error('获取商品分类失败！')
       }
-      // console.log(res)
+      console.log(res)
       this.cateList = res
+      window.sessionStorage.setItem('cate', res)
       this.total = this.cateList.length
       // console.log(this.cateList)
     },

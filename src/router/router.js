@@ -60,7 +60,7 @@ const routes = [
         component: GoodsList
       },
       {
-        path: '/goods/add',
+        path: '/add',
         component: Add
       },
       {

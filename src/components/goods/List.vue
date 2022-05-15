@@ -241,7 +241,7 @@ export default {
     },
     // 点击添加商品按钮，通过编程式导航跳转到添加商品页面
     goAddPage() {
-      this.$router.push('/goods/add')
+      this.$router.push('/add')
     },
     // 点击取消编辑
     editDialogVisible2() {
@@ -304,8 +304,9 @@ export default {
       // } else {
       //   this.previewPath = this.fileList.pic
       // }
+      // console.log(this.fileList)
       this.previewVisable = true
-      this.fileList.join({ name: '11', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg' })
+      // this.fileList.join({ name: '11', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg' })
     },
     beforeremove() {
       if (this.editForm.imgurl.length === 1) {
@@ -323,10 +324,10 @@ export default {
         // console.log(filePath)
         // 2.从imgurl数组中，找到这个图片对应的索引值
         const idx = this.editForm.imgurl.findIndex(x => x.pic === filePath)
-        const idx2 = this.fileList.findIndex(x => x.pic === filePath)
+        const idx2 = this.fileList.findIndex(x => x.url === filePath)
         // 3.调用数组的 splice 方法，把图片信息对象，从imgurl数组中移除
-        this.fileList.splice(idx2, 1)
         this.editForm.imgurl.splice(idx, 1)
+        this.fileList.splice(idx2, 1)
         console.log(this.fileList)
         console.log(this.editForm.imgurl)
       }

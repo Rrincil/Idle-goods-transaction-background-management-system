@@ -191,13 +191,6 @@ export default {
       previewVisable: false
     }
   },
-  created() {
-    // 解析token获取id
-    const decoded = jwtdecode(window.sessionStorage.token)
-    this.addForm.userid = decoded.id
-    this.addForm.shopname = decoded.shopname
-    this.getCatList()
-  },
   computed: {
     cateId() {
       if (this.addForm.goods_cat.length === 3) {
@@ -208,15 +201,15 @@ export default {
   },
   methods: {
     // 获取所有商品分类列表
-    async getCatList() {
+    getCatList() {
       const decoded = jwtdecode(window.sessionStorage.token)
       const userid = decoded.id
-      const { data: res } = await this.$http.post('api/categorie/getallmes', { userid: userid })
-      if (!res) {
-        return this.$message.error('获取商品分类失败！')
-      }
-      this.cateList = res
-      // console.log(this.cateList)
+      this.$http.post('api/categorie/getallmes', { userid: userid }).then(res=>{
+        if (!res) {
+          return this.$message.error('获取商品分类失败！')
+        }
+        this.cateList = res.data
+      })
     },
     // 监听级联选择器变化
     parentCateChange() {
@@ -412,6 +405,15 @@ export default {
         this.$router.push('/goods')
       })
     }
+  },
+  created() {
+    // 解析token获取id
+    const decoded = jwtdecode(window.sessionStorage.token)
+    this.addForm.userid = decoded.id
+    this.addForm.shopname = decoded.shopname
+  },
+  mounted() {
+    this.getCatList()
   }
 }
 </script>

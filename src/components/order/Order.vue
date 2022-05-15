@@ -90,9 +90,12 @@
     </el-dialog>
     <!-- 展示物流进度的对话框 -->
     <el-dialog title="物资信息" :visible.sync="progressVisible" width="45%" @close="addressDialogClosed">
-      <el-timeline>
-        <p>{{progressInfo.name}}</p>
-        <p>{{progressInfo.num}}{{progressInfo.cateparams}}</p>
+      <el-timeline v-if="isinfo">
+        <img :src="progressInfo.imgurl[0].pic" class="imgurl"/>
+        <p class="Infoname">{{progressInfo.name}}</p>
+        <p class="Infocateparams">{{progressInfo.num}}份</p>
+        <p>电话：{{progressInfo.usermessage[0].iphone}} </p>
+        <p>姓名地址：{{progressInfo.usermessage[0].address}} </p>
       </el-timeline>
     </el-dialog>
   </div>
@@ -130,7 +133,8 @@ export default {
       cityData: cityData,
       // 物流信息数据
       progressInfo: [],
-      data: '2022.05.04'
+      data: '2022.05.04',
+      isinfo: false
     }
   },
   created() {
@@ -191,8 +195,10 @@ export default {
       this.addressVisible = true
     },
     // 展示物流进度的对话框
-    async showProgressBox(item) {
+    showProgressBox(item) {
+      this.isinfo = true
       this.progressInfo = item
+      console.log(item)
       this.progressVisible = true
       // console.log(item)
     },
@@ -209,5 +215,34 @@ export default {
 @import '../../plugins/timeline-item/timeline-item.css';
 .el-cascader{
   width: 100%;
+}
+.Infoname{
+  width: 100%;
+  height: 20px;
+  text-align: center;
+  font-weight: 900 !important;
+  color: rgb(143, 4, 4) !important;
+  font-size: 45px !important;
+}
+.Infocateparams{
+  width: 100%;
+  height: 20px;
+  text-align: center;
+  color: red !important ;
+  font-weight: 900 !important;
+  font-size: 45px !important;
+}
+.el-timeline p{
+  width: 100%;
+  height: 20px;
+  text-align: center;
+  font-size: 30px;
+  font-weight: 900 !important;
+  color: rgb(39, 36, 36);
+}
+.imgurl{
+  width: 200px;
+  height: 200px;
+  margin-left: 30%;
 }
 </style>
