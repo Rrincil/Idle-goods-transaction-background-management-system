@@ -37,6 +37,9 @@ axios.interceptors.response.use(config => {
   NProgress.done()
   return config
 })
+import VueAxios from 'vue-axios'
+
+Vue.use(VueAxios,axios);
 // 将axios挂载到Vue原型对象上
 Vue.prototype.$http = axios
 

@@ -23,8 +23,9 @@
         <el-table-column label="订单价格" prop="price"></el-table-column>
         <el-table-column label="是否付款" prop="ispay">
           <template slot-scope="scope">
-            <el-tag type="success" v-if="scope.row.ispay === '1'">已付款</el-tag>
-            <el-tag type="danger" v-else>未付款</el-tag>
+            <el-tag type="info" v-if="scope.row.ispay === 2">已退款</el-tag>
+            <el-tag type="success" v-if="scope.row.ispay === 1 ">已付款</el-tag>
+            <el-tag type="danger" v-if="scope.row.ispay === 0 ">未付款</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="手机号" prop="usermessage[0].iphone">
@@ -40,9 +41,9 @@
         </el-table-column>
         <el-table-column label="操作" width="180px">
           <template slot-scope="scope">
-            <!-- 修改按钮 -->
+            <!-- 退款按钮 -->
             <el-button
-              @click="showEditDialog(scope.row.id)"
+              @click="showEditDialog(scope.row)"
               type="primary"
               icon="el-icon-edit"
               size="mini"
@@ -70,22 +71,22 @@
       ></el-pagination>
     </el-card>
     <!-- 修改地址的对话框 -->
-    <el-dialog title="分配角色" :visible.sync="addressVisible" width="45%" @close="addressDialogClosed">
+    <el-dialog title="退款信息" :visible.sync="addressVisible" width="45%" @close="addressDialogClosed">
       <!-- 内容主体区域 -->
       <el-form ref="addressFormRef" :model="addressForm" :rules="addressFormRules" label-width="100px">
         <!-- 省市区/县 -->
-        <el-form-item label="省市区/县" prop="address1">
-          <el-cascader :options="cityData" v-model="addressForm.address1"></el-cascader>
+        <el-form-item label="物品" prop="address1">
+          <el-cascader :options="cityData" v-model="progressInfo.name"></el-cascader>
         </el-form-item>
         <!-- 详细地址 -->
-        <el-form-item label="详细地址" prop="address2">
-          <el-input v-model="addressForm.address2"></el-input>
+        <el-form-item label="退款金额" prop="address2">
+          <el-input v-model="progressInfo.price"></el-input>
         </el-form-item>
       </el-form>
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
         <el-button @click="addressVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addressVisible = false">确 定</el-button>
+        <el-button type="primary" @click="refund()">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 展示物流进度的对话框 -->
@@ -102,6 +103,7 @@
 </template>
 
 <script>
+import md5 from 'js-md5'
 import jwtdecode from 'jwt-decode'
 import cityData from './citydata'
 export default {
@@ -116,6 +118,7 @@ export default {
       },
       orderList: [],
       total: 0,
+      ispaycode: 0,
       addressVisible: false,
       progressVisible: false,
       addressForm: {
@@ -132,7 +135,7 @@ export default {
       },
       cityData: cityData,
       // 物流信息数据
-      progressInfo: [],
+      progressInfo:{},
       data: '2022.05.04',
       isinfo: false
     }
@@ -142,6 +145,38 @@ export default {
   },
   computed: {},
   methods: {
+    refund(){
+      let md =`access_key=f9ce7161e186c5362198524320650236&refund_fee=${this.progressInfo.num*this.progressInfo.price*100}&out_order_no=${this.progressInfo.serialNo}`;
+      let s2 = md5(md)
+      s2=s2.toUpperCase();
+        let u = {
+        access_key: "f9ce7161e186c5362198524320650236",
+        refund_fee: this.progressInfo.num*this.progressInfo.price*100,
+        out_order_no:this.progressInfo.serialNo,
+        sign:s2,
+      };
+      let s = JSON.stringify(u);
+      this.$http.post( "https://open.weidoufu.com/pay/refund",
+        u,
+        {headers: {
+          'Content-Type':'application/json;charset=utf-8'      //改这里就好了
+        }}).then(
+        (response) => {
+          console.log(response);
+          if(response.data.code === 0) {
+            this.$http.post('api/order/editisPay2',{_id:this.progressInfo._id}).then(res=>{
+              console.log(res)
+              this.$message.success('退款成功！')
+            })
+          }
+        },
+        (error) => {
+          console.log(error.message);
+        }
+      );
+      this.addressVisible = false
+    },//退款
+
     // 是否发货
     userStateChanged(item) {
       console.log(item)
@@ -190,8 +225,10 @@ export default {
       this.queryInfo.pagenum = newPage
       // this.getGoodsList()
     },
-    // 展示修改按钮的对话框
-    showEditDialog() {
+    // 展示退款按钮的对话框
+    showEditDialog(item) {
+      this.progressInfo = item
+      console.log(item)
       this.addressVisible = true
     },
     // 展示物流进度的对话框
