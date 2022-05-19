@@ -75,18 +75,19 @@
       <!-- 内容主体区域 -->
       <el-form ref="addressFormRef" :model="addressForm" :rules="addressFormRules" label-width="100px">
         <!-- 省市区/县 -->
-        <el-form-item label="物品" prop="address1">
-          <el-cascader :options="cityData" v-model="progressInfo.name"></el-cascader>
+        <el-form-item label="物品" >
+          <input v-model="progressInfo.name" disabled style="color:red;width: auto;font-size:30px;"/>
+          <!-- <el-cascader :options="cityData" v-model="progressInfo.name" disabled></el-cascader> -->
         </el-form-item>
         <!-- 详细地址 -->
-        <el-form-item label="退款金额" prop="address2">
-          <el-input v-model="progressInfo.price"></el-input>
+        <el-form-item label="退款金额（元）" >
+          <input v-model="progressInfo.price" disabled style="color:red;width: auto;font-size:30px;"/>
         </el-form-item>
       </el-form>
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
         <el-button @click="addressVisible = false">取 消</el-button>
-        <el-button type="primary" @click="refund()">确 定</el-button>
+        <el-button type="primary"  @click="refund()">确 定退款</el-button>
       </span>
     </el-dialog>
     <!-- 展示物流进度的对话框 -->
@@ -143,6 +144,9 @@ export default {
   created() {
     this.getOrderList()
   },
+   mounted() {
+    this.$bus.$on("order",this.getgoods)
+  },
   computed: {},
   methods: {
     refund(){
@@ -163,11 +167,13 @@ export default {
         }}).then(
         (response) => {
           console.log(response);
-          if(response.data.code === 0) {
+          if(response.data.code === 1) {
             this.$http.post('api/order/editisPay2',{_id:this.progressInfo._id}).then(res=>{
               console.log(res)
               this.$message.success('退款成功！')
             })
+          }else {
+            this.$message.error('退款失败！')
           }
         },
         (error) => {
@@ -242,7 +248,14 @@ export default {
     // 监听对话框的关闭事件
     addressDialogClosed() {
       this.progressVisible = false
-    }
+    },
+
+    getgoods(x){
+      this.orderList = x
+      // console.log(x,'总线')
+      // this.progressInfo=x
+  },
+
   }
 }
 </script>
@@ -282,4 +295,5 @@ export default {
   height: 200px;
   margin-left: 30%;
 }
+
 </style>

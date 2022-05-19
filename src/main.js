@@ -27,7 +27,11 @@ axios.defaults.baseURL = 'http://101.201.220.43:3001/api'
 // 在 request 拦截器中，显示进度条 NProgress.start()
 // 设置axios请求拦截器
 axios.interceptors.request.use(config => {
-  NProgress.start()
+  if(window.sessionStorage.getItem('mes')===1){
+
+  }else{
+    NProgress.start()
+  }
   config.headers.Authorization = window.sessionStorage.getItem('token')
   // console.log(config)
   return config
@@ -62,5 +66,8 @@ Vue.filter('dataFormat', function(originVal) {
 
 new Vue({
   router,
-  render: h => h(App)
+  render: h => h(App),
+  beforeCreate() {
+    Vue.prototype.$bus=this
+   },
 }).$mount('#app')

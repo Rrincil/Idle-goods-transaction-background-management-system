@@ -27,7 +27,11 @@ import 'nprogress/nprogress.css'
 // 在 request 拦截器中，显示进度条 NProgress.start()
 // 设置axios请求拦截器
 axios.interceptors.request.use(config => {
-  NProgress.start()
+  if(window.sessionStorage.getItem('mes')===1){
+
+  }else{
+    NProgress.start()
+  }
   config.headers.Authorization = window.sessionStorage.getItem('token')
   // console.log(config)
   return config
@@ -59,5 +63,8 @@ Vue.filter('dataFormat', function(originVal) {
 
 new Vue({
   router,
+  beforeCreate() {
+    Vue.prototype.$bus=this
+   },
   render: h => h(App)
 }).$mount('#app')

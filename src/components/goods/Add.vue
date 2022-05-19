@@ -312,7 +312,11 @@ export default {
     handleRemove(file) {
       // 1.获取将要删除的图片的临时路径
       // console.log(file)
-      console.log(file.response)
+      const filePath = file.url
+      console.log(this.addForm.imgurl)
+      const idx = this.addForm.imgurl.findIndex(x => x.pic === filePath)
+        // 3.调用数组的 splice 方法，把图片信息对象，从imgurl数组中移除
+      this.addForm.imgurl.splice(idx, 1)
       // const filePath = file.response.url
       // 2.从imgurl数组中，找到这个图片对应的索引值
       // const idx = this.addForm.imgurl.findIndex(x => x.pic === filePath)

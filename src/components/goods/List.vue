@@ -26,7 +26,7 @@
         <el-form ref="editFormRef" :model="editForm"  label-width="70px">
           <!-- 用户名 -->
           <el-form-item label="商品名" prop="name">
-            <el-input v-model="editForm.name" disabled></el-input>
+            <el-input v-model="editForm.name" ></el-input>
           </el-form-item>
           <!-- 邮箱 -->
           <el-form-item prop="num" label="数量">

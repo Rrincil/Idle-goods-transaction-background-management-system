@@ -1,9 +1,11 @@
 import Vue from 'vue'
-import { Button, Form, FormItem, Input, Message, Container, Header, Aside, Main, Menu, submenu, MenuItem, MenuItemGroup, Breadcrumb, BreadcrumbItem, Card, Col, Row, Table, TableColumn, Switch, Tooltip, Pagination, Dialog, MessageBox, Tag, Tree, Select, Option, Cascader, Alert, Tabs, TabPane, Steps, Step, CheckboxGroup, Checkbox, Upload } from 'element-ui'
+import { Button, Form,Notification, FormItem, Input, Message, Container, Header, Aside, Main, Menu, submenu, MenuItem, MenuItemGroup, Breadcrumb, BreadcrumbItem, Card, Col, Row, Table, TableColumn, Switch, Tooltip, Pagination, Dialog, MessageBox, Tag, Tree, Select, Option, Cascader, Alert, Tabs, TabPane, Steps, Step, CheckboxGroup, Checkbox, Upload } from 'element-ui'
+
+
 
 import Timeline from './timeline/index'
 import TimelineItem from './timeline-item/index'
-
+// Vue.use(Notification)
 Vue.use(Button)
 Vue.use(Form)
 Vue.use(FormItem)
@@ -42,6 +44,7 @@ Vue.use(Checkbox)
 Vue.use(Upload)
 Vue.use(Timeline)
 Vue.use(TimelineItem)
+Vue.prototype.Notification = Notification
 // 将弹框提示组件进行全局挂载，$message为自定义属性，可任意修改
 Vue.prototype.$message = Message
 // 将消息提示组件进行全局挂载，$confirm为自定义属性，可任意修改

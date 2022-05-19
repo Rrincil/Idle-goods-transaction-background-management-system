@@ -35,8 +35,8 @@ export default {
       //   password: '123456'
       // },
       loginForm: {
-        email: '1@text.com',
-        password: '123456'
+        email: '',
+        password: ''
       },
       // 表单的验证规则对象
       loginFormRules: {
