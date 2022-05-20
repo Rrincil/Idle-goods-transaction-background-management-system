@@ -8,8 +8,8 @@
           <!-- 登录表单区域 -->
           <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules" label-width="0px" class="login_form">
             <!-- 用户名 -->
-            <el-form-item prop="username">
-                <el-input v-model="loginForm.username" prefix-icon="iconfont icon-user"></el-input>
+            <el-form-item prop="email">
+                <el-input v-model="loginForm.email" prefix-icon="iconfont icon-user"></el-input>
             </el-form-item>
             <!-- 密码 -->
             <el-form-item prop="password">
@@ -35,7 +35,7 @@ export default {
       //   password: '123456'
       // },
       loginForm: {
-        email: '',
+        email: '1@text.com',
         password: ''
       },
       // 表单的验证规则对象
@@ -43,7 +43,7 @@ export default {
         // 验证用户名是否合法
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+          { min: 3, max: 20, message: '长度在 3 到 10 个字符', trigger: 'blur' }
         ],
         // 验证密码是否合法
         password: [
@@ -63,16 +63,21 @@ export default {
       this.$refs.loginFormRef.validate(async (valid) => {
         // console.log(valid)
         if (!valid) return 0
+        console.log(this.loginForm)
         const { data: res } = await this.$http.post('api/users/login', this.loginForm)
         // const { data: res } = await this.$http.post('login', this.loginForm)
         // console.log(res);
-        if (!res) return this.$message.error('登录失败！')
-        this.$message.success('登录成功！')
-        // console.log(res.token)
-        // console.log(res)
-        window.sessionStorage.setItem('token', res.token)
-        // console.log(res.data.token)
-        this.$router.push('/home')
+        if (res.token){
+          this.$message.success('登录成功！')
+          // console.log(res.token)
+          // console.log(res)
+          window.sessionStorage.setItem('token', res.token)
+          // console.log(res.data.token)
+          this.$router.push('/home')
+        } else{
+          this.$message.error(res.mes)
+        }
+
         // console.log(res)
         // 1.将登录成功之后的 token，保存到客户端的 sessionStorage 中
         //   1.1项目中除了登录之外的其它api接口，必须在登录之后才能访问

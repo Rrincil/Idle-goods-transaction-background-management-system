@@ -470,7 +470,21 @@ export default {
     }
   },
   mounted() {
-    this.getList()
+    const decoded = jwtdecode(window.sessionStorage.token)
+    const userid = decoded.id
+    if(userid==='62870621b1bc7ea6c90fb04e') {
+      this.sale=0,
+      this.OrderPaid = 0,
+      this.UnrefundedOrder = 0,
+      this.unpaidOrder = 0,
+      this.OrderRefunded= 0
+      this.option3= []
+      this.option2=[]
+      this.option = []
+    }else{
+      this.getList()
+    }
+
   },
   created() {
     // 获取所有的权限

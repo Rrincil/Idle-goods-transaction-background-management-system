@@ -141,6 +141,7 @@
 </template>
 
 <script>
+import jwtdecode from 'jwt-decode'
 export default {
   data() {
     // 验证邮箱的规则
@@ -182,7 +183,8 @@ export default {
         sex: '男',
         email: '',
         mobile: '',
-        role_name: '超级管理员'
+        role_name: '超级管理员',
+        Merchantid:null
       },
       // 查询到的用户信息对象
       editForm: {
@@ -244,9 +246,17 @@ export default {
   created() {
     this.getUserList()
   },
+  mounted(){
+    const decoded = jwtdecode(window.sessionStorage.token)
+    const userid = decoded.id
+    this.addForm.Merchantid = userid
+    // console.log(this.addForm.Merchantid);
+  },
   methods: {
     async getUserList() {
-      const { data: res } = await this.$http.get('api/userlist/getallmes')
+      const decoded = jwtdecode(window.sessionStorage.token)
+      const userid = decoded.id
+      const { data: res } = await this.$http.post('api/userlist/getallmes',{Merchantid: userid})
       // const { data: res } = await this.$http.get('api/userlist/getallmes', {
       //   params: this.queryInfo
       // })
@@ -293,17 +303,24 @@ export default {
       this.$refs.addFormRef.validate(async valid => {
         // console.log(valid)
         if (!valid) return 0
-        const { data: res } = await this.$http.post('api/userlist/add', this.addForm)
-        console.log(res)
-        if (!res) {
-          return this.$message.error('添加用户失败！')
-        }
-        this.$message.success('添加用户成功！')
-        // console.log(res)
-        // 隐藏添加用户的对话框
-        this.addDialogVisible = false
-        // 重新获取用户列表数据
-        this.getUserList()
+        // const a = this.addForm
+        console.log(this.addForm);
+        // console.log(a);
+        this.$http.post('api/userlist/add', this.addForm).then(res=>{
+          // console.log(res);
+          // console.log(res.mes);
+          if (res.data.mes==='成功加入用户了') {
+            this.$message.success('添加用户成功！')
+            // console.log(res)
+            // 隐藏添加用户的对话框
+            this.addDialogVisible = false
+            // 重新获取用户列表数据
+            this.getUserList()
+
+          }else{
+            this.$message.error(res.data.mes)
+          }
+        })
       })
     },
     // 点击修改按钮，展示修改页面对话框

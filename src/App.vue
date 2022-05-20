@@ -1,8 +1,8 @@
 <template>
   <div id="app" :style="{ width:fullHeight+'px'}">
     <!--路由占位符-->
-    <audio id="myaudio" src="./assets/mes.mp3" autoplay="autoplay"  muted="muted"></audio>
-     <audio id="myaudio2" src="./assets/unmes.mp3" autoplay="autoplay"  muted="muted"></audio>
+    <audio id="myaudio" src="./assets/mes.mp3"   muted="muted"></audio>
+     <audio id="myaudio2" src="./assets/unmes.mp3"   muted="muted"></audio>
     <router-view></router-view>
 
   </div>
@@ -94,11 +94,13 @@ export default {
       })
     },
     mes() {
-      setInterval(()=>{
-        window.sessionStorage.setItem('mes', 1)
-        this.getOrderList2()
-        // console.log(window.sessionStorage.getItem('mes'));
-      }, 10000);
+      if(window.sessionStorage.getItem('token')) {
+        setInterval(()=>{
+          window.sessionStorage.setItem('mes', 1)
+          this.getOrderList2()
+          // console.log(window.sessionStorage.getItem('mes'));
+        }, 10000);
+      }
     }
 
   },
