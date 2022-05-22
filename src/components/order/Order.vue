@@ -17,7 +17,7 @@
         </el-col>
       </el-row>
       <!-- 订单列表区域 -->
-      <el-table :data="orderList" border stripe>
+      <el-table :data="orderList2" border stripe>
         <el-table-column type="index"></el-table-column>
         <el-table-column label="订单编号" prop="serialNo"></el-table-column>
         <el-table-column label="订单价格" prop="price"></el-table-column>
@@ -117,6 +117,7 @@ export default {
         // 当前每页显示的数据数
         pagesize: 10
       },
+      orderList2: [],
       orderList: [],
       total: 0,
       ispaycode: 0,
@@ -205,6 +206,7 @@ export default {
       // console.log(res)
       this.orderList = res
       this.total = this.orderList.length
+      this.orderList2 = this.orderList.slice(0, 10)
     },
     // 监听pageSize改变的事件
     handleSizeChange(newSize) {
@@ -212,7 +214,7 @@ export default {
       const newPage = this.queryInfo.pagenum
       const firstpagesnum = (newPage - 1) * newSize
       const lastpagesnum = newPage * newSize
-      this.goodsList2 = this.goodsList.slice(firstpagesnum, lastpagesnum)
+      this.orderList2 = this.orderList.slice(firstpagesnum, lastpagesnum)
       // 每页显示的数据改变
       this.queryInfo.pagesize = newSize
       console.log(newSize)
@@ -226,10 +228,10 @@ export default {
       // console.log(firstpagesnum)
       const lastpagesnum = newPage * newSize
       // console.log(lastpagesnum)
-      this.goodsList2 = this.goodsList.slice(firstpagesnum, lastpagesnum)
+      this.orderList2 = this.orderList.slice(firstpagesnum, lastpagesnum)
       // 页码改变
       this.queryInfo.pagenum = newPage
-      // this.getGoodsList()
+      // this.getorderList()
     },
     // 展示退款按钮的对话框
     showEditDialog(item) {

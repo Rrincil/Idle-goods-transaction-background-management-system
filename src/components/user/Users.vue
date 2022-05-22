@@ -21,7 +21,7 @@
         </el-col>
       </el-row>
       <!-- 用户列表区域 -->
-      <el-table :data="userList" border stripe>
+      <el-table :data="userList2" border stripe>
         <el-table-column type="index"></el-table-column>
         <el-table-column label="姓名" prop="username"></el-table-column>
         <el-table-column label="邮箱" prop="email"></el-table-column>
@@ -171,6 +171,7 @@ export default {
         // 当前每页显示的数据数
         pagesize: 2
       },
+      userList2: [],
       userList: [],
       total: 0,
       // 控制添加用户对话框的显示与隐藏
@@ -267,17 +268,32 @@ export default {
       // console.log(res)
       this.userList = res
       this.total = this.userList.length
+      this.userList2 = this.userList.slice(0, 2)
       // console.log(res)
     },
     // 监听pageSize改变的事件
     handleSizeChange(newSize) {
+      const newPage = this.queryInfo.pagenum
+      const firstpagesnum = (newPage - 1) * newSize
+      const lastpagesnum = newPage * newSize
+      this.userList2 = this.userList.slice(firstpagesnum, lastpagesnum)
+      // 每页显示的数据改变
       this.queryInfo.pagesize = newSize
-      this.getUserList()
+      console.log(newSize)
     },
     // 监听页码值改变的事件
     handleCurrentChange(newPage) {
+      // console.log(newPage)
+      const newSize = this.queryInfo.pagesize
+      // console.log(newPage)
+      const firstpagesnum = (newPage - 1) * newSize
+      // console.log(firstpagesnum)
+      const lastpagesnum = newPage * newSize
+      // console.log(lastpagesnum)
+      this.userList2 = this.userList.slice(firstpagesnum, lastpagesnum)
+      // 页码改变
       this.queryInfo.pagenum = newPage
-      this.getUserList()
+      // this.getuserList()
     },
     // 监听switch开关状态的改变
     async userStateChanged(userinfo) {

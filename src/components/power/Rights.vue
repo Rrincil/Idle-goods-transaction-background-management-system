@@ -449,9 +449,9 @@ export default {
         this.option3.yAxis[1].interval = 50 * 1
         this.sale = 316
         this.OrderPaid = 226
-        this.UnrefundedOrder = 320
+        this.UnrefundedOrder = 20
         this.unpaidOrder = 116
-        this.OrderRefunded = 52
+        this.OrderRefunded = 22
         this.getList()
         this.getdatalist(x)
       } else{
